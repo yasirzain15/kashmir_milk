@@ -212,7 +212,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                     onPressed: () => exportToFirebase(),
                     icon: const Icon(Icons.cloud_upload),
                     label: Text(
-                      isUploading ? "Exporting..." : "Export to Firebase 🚀",
+                      isUploading ? "Exporting..." : "Export 🚀",
                       overflow: TextOverflow.ellipsis,
                     ),
                     style: ElevatedButton.styleFrom(

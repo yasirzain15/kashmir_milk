@@ -241,74 +241,77 @@ class DashboardScreen extends StatelessWidget {
   }
 
   Widget _buildStatsCard(String title, String value) {
-    return Container(
-      height: 154,
-      width: 327,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.blue[400]!, Colors.blue[300]!],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Padding(
+      padding: const EdgeInsets.only(left: 32, right: 31),
+      child: Container(
+        height: 154,
+        width: 327,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue[400]!, Colors.blue[300]!],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
         ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: GoogleFonts.josefinSans(
-              textStyle: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 10,
-                color: Color(0xffffffff),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: GoogleFonts.josefinSans(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 10,
+                  color: Color(0xffffffff),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: GoogleFonts.josefinSans(
-              textStyle: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 10,
-                color: Color(0xffffffff),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: GoogleFonts.josefinSans(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 10,
+                  color: Color(0xffffffff),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 50,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(show: false),
-                titlesData: FlTitlesData(show: false),
-                borderData: FlBorderData(show: false),
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: [
-                      const FlSpot(0, 3),
-                      const FlSpot(2, 2),
-                      const FlSpot(4, 5),
-                      const FlSpot(6, 3.1),
-                      const FlSpot(8, 4),
-                      const FlSpot(10, 3),
-                    ],
-                    isCurved: true,
-                    color: Colors.white.withOpacity(0.8),
-                    barWidth: 2,
-                    dotData: FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      color: Colors.white.withOpacity(0.2),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 50,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(show: false),
+                  titlesData: FlTitlesData(show: false),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: [
+                        const FlSpot(0, 3),
+                        const FlSpot(2, 2),
+                        const FlSpot(4, 5),
+                        const FlSpot(6, 3.1),
+                        const FlSpot(8, 4),
+                        const FlSpot(10, 3),
+                      ],
+                      isCurved: true,
+                      color: Colors.white.withOpacity(0.8),
+                      barWidth: 2,
+                      dotData: FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.white.withOpacity(0.2),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
