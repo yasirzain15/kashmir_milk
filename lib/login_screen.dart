@@ -3,10 +3,44 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/auth_ser.dart';
 import 'package:kashmeer_milk/dashboard.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   LoginScreen({super.key});
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool isLoading = false; // Added loading state
+
+  Future<void> _signIn() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final message = await AuthService().login(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    setState(() {
+      isLoading = false;
+    });
+
+    if (message!.contains('Success')) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const DashboardScreen(),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,24 +53,19 @@ class LoginScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Time display at top
-                const Align(
-                  alignment: Alignment.topLeft,
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                  ),
-                ),
+                const SizedBox(height: 20),
 
-                // Illustration and Sign in text
+                // Illustration
                 Image.asset(
-                  'assets/login.png', // Make sure to add the illustration to your assets
+                  'assets/login.png',
                   height: 200,
                 ),
                 const SizedBox(height: 20),
+
                 Text(
                   'Sign in here !',
                   style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
+                    textStyle: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                       color: Color(0xff878787),
@@ -45,14 +74,15 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // Username TextField
+                // Email TextField
                 TextField(
+                  keyboardType: TextInputType.emailAddress,
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: 'Username',
+                    hintText: 'Email',
                     prefixIcon: const Icon(Icons.email_outlined),
                     filled: true,
-                    fillColor: Color(0xffffffff),
+                    fillColor: const Color(0xffffffff),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -63,29 +93,30 @@ class LoginScreen extends StatelessWidget {
 
                 // Password TextField
                 TextField(
+                  keyboardType: TextInputType.visiblePassword,
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: 'Password',
                     prefixIcon: const Icon(Icons.lock_outline),
                     filled: true,
-                    fillColor: Color(0xffffffff),
+                    fillColor: const Color(0xffffffff),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 15,
-                ),
+                const SizedBox(height: 15),
+
+                // Forgot Password
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
                       'Reset Password',
                       style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
+                        textStyle: const TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
                           color: Color(0xffd70000),
@@ -96,42 +127,37 @@ class LoginScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Sign In Button
+                // Sign In Button with Loading Indicator
                 GestureDetector(
-                  onTap: () async {
-                    final message = await AuthService().login(
-                      email: _emailController.text,
-                      password: _passwordController.text,
-                    );
-                    if (message!.contains('Success')) {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const DashboardScreen(),
-                        ),
-                      );
-                    }
-                  },
+                  onTap:
+                      isLoading ? null : _signIn, // Disable button if loading
                   child: Container(
                     height: 36.53,
                     width: 300,
                     decoration: BoxDecoration(
-                      color: Color(0xff78c1f3),
+                      color: isLoading ? Colors.grey : const Color(0xff78c1f3),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     child: Center(
-                      child: Text(
-                        'Sign in',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xffffffff),
-                          ),
-                        ),
-                      ),
+                      child: isLoading
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : Text(
+                              'Sign in',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xffffffff),
+                                ),
+                              ),
+                            ),
                     ),
                   ),
                 ),
-                SizedBox(height: 144.47),
+
+                const SizedBox(height: 144.47),
 
                 // Request Account Link
                 Row(
