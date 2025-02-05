@@ -244,7 +244,7 @@ class DashboardScreen extends StatelessWidget {
     return Container(
       height: 154,
       width: 327,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.blue[400]!, Colors.blue[300]!],
