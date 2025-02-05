@@ -279,7 +279,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                     )
                   : const Center(
                       child: Text(
-                        "File Uploaded Successfully📭",
+                        "",
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
