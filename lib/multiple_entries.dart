@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CsvExcelUploader extends StatefulWidget {
@@ -17,7 +16,6 @@ class CsvExcelUploader extends StatefulWidget {
 class _CsvExcelUploaderState extends State<CsvExcelUploader> {
   List<Map<String, dynamic>> fileData = [];
   String? fileName;
-  PlatformFile? file;
   bool isUploading = false;
   int uploadProgress = 0;
 
@@ -42,17 +40,28 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       PlatformFile pickedFile = result.files.first;
       String csvString = utf8.decode(pickedFile.bytes!);
       fileName = pickedFile.name;
-      file = pickedFile;
+
+      // Debug: Print CSV string to verify contents
+      print("CSV content: $csvString");
 
       List<List<dynamic>> csvTable =
           const CsvToListConverter().convert(csvString);
 
-      if (csvTable.isEmpty) throw Exception("CSV file is empty");
+      if (csvTable.isEmpty) {
+        throw Exception("CSV file is empty");
+      }
 
-      List<String> headers = csvTable[0].map((e) => e.toString()).toList();
-      List<Map<String, dynamic>> dataList = csvTable.skip(1).map((row) {
-        return Map.fromIterables(headers, row);
-      }).toList();
+      // Debug: Print CSV Table to verify parsing
+      print("CSV Table: $csvTable");
+
+      List<String> headers = csvTable.first.map((e) => e.toString()).toList();
+      List<Map<String, dynamic>> dataList = csvTable
+          .skip(1)
+          .map((row) => Map<String, dynamic>.fromIterables(headers, row))
+          .toList();
+
+      // Debug: Print parsed dataList
+      print("Parsed data: $dataList");
 
       setState(() {
         fileData = dataList;
@@ -93,7 +102,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       String userId =
-          "user_123"; // 🔹 Replace with actual user ID (e.g., Firebase Auth UID)
+          "user_123"; // 🔹 Replace with actual Firebase Authentication UID
 
       CollectionReference userCollection =
           firestore.collection('users').doc(userId).collection('csv_data');
