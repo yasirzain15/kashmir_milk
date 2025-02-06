@@ -96,11 +96,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
               const SizedBox(height: 20),
 
               // Profile Image Section (Ignored for now)
-              const CircleAvatar(
-                radius: 60,
-                backgroundColor: Colors.grey,
-                child: Icon(Icons.person, size: 50, color: Colors.white),
-              ),
+
               const SizedBox(height: 30),
 
               // Form Fields
