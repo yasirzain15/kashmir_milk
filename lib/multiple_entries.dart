@@ -1,5 +1,6 @@
 // ignore_for_file: depend_on_referenced_packages
 
+import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
@@ -16,8 +17,9 @@ class CsvExcelUploader extends StatefulWidget {
 }
 
 class _CsvExcelUploaderState extends State<CsvExcelUploader> {
-  List<List<dynamic>> fileData = [];
+  List<Map<String, dynamic>> fileData = [];
   String? fileName;
+  PlatformFile? file;
   String? fileType;
   bool isUploading = false;
   bool isFileSelected = false;
@@ -52,6 +54,50 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     return true;
   }
 
+  Future<List<Map<String, dynamic>>> readCsvFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        withData: true, // Ensures the file data is loaded
+      );
+
+      if (result == null || result.files.isEmpty) {
+        throw Exception("No file selected");
+      }
+
+      PlatformFile pickedFile = result.files.first;
+      String csvString = utf8.decode(pickedFile.bytes!);
+      fileName = pickedFile.name;
+      fileType = pickedFile.extension;
+      file = pickedFile;
+
+      List<List<dynamic>> csvTable =
+          const CsvToListConverter().convert(csvString);
+
+      if (csvTable.isEmpty) {
+        throw Exception("CSV file is empty");
+      }
+
+      List<String> headers = csvTable[0].map((e) => e.toString()).toList();
+      List<List<dynamic>> dataRows = csvTable.sublist(1); // Skip headers
+
+      List<Map<String, dynamic>> dataList = dataRows.map((row) {
+        if (row.length != headers.length) {
+          throw Exception(
+              "Invalid row length. Expected ${headers.length}, got ${row.length}");
+        }
+
+        return Map.fromIterables(headers, row);
+      }).toList();
+
+      return dataList;
+    } catch (e) {
+      print("Error reading CSV: $e");
+      return [];
+    }
+  }
+
   Future<void> pickFile() async {
     bool permissionGranted = await _requestPermissions();
     if (!permissionGranted) return;
@@ -67,8 +113,8 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
         PlatformFile pickedFile = result.files.first;
 
         if (pickedFile.extension == "csv") {
-          (pickedFile);
           setState(() {
+            file = pickedFile;
             fileName = pickedFile.name;
             fileType = pickedFile.extension;
             isFileSelected = true;
@@ -99,7 +145,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
   }
 
   Future<void> exportToFirebase() async {
-    if (fileData.isEmpty) {
+    if (file == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No data to upload ❌"),
@@ -118,9 +164,8 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
       // Get headers from the first row
-      List<String> headers = fileData[0].map((e) => e.toString()).toList();
-      List<dynamic> dataRows = fileData[0].sublist(1); // Remove header row
-
+      List<String> headers = fileData.map((e) => e.toString()).toList();
+      List<dynamic> dataRows = fileData.sublist(1); // Remove header row
       int processedRows = 0;
 
       for (var row in dataRows) {
@@ -197,7 +242,9 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  onPressed: isUploading ? null : pickFile,
+                  onPressed: () async {
+                    fileData = await readCsvFile();
+                  },
                   icon: const Icon(Icons.file_upload),
                   label: const Text("Select CSV File 📂"),
                   style: ElevatedButton.styleFrom(
@@ -268,7 +315,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              fileData[index].join(", "),
+                              "",
                               style: TextStyle(
                                 color: index == 0 ? Colors.blue : null,
                               ),
