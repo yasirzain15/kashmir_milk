@@ -57,7 +57,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         'phone': _phoneController.text.trim(),
         'milk_quantity': _milkQuantityController.text.trim(),
         'estimated_price': estimatedPrice,
-        'timestamp': FieldValue.serverTimestamp(),
+        'Registration Time': FieldValue.serverTimestamp(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
