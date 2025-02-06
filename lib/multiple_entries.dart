@@ -6,26 +6,35 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-class CsvUploader extends StatefulWidget {
-  const CsvUploader({super.key});
+class CsvExcelUploader extends StatefulWidget {
+  const CsvExcelUploader({super.key});
 
   @override
-  _CsvUploaderState createState() => _CsvUploaderState();
+  _CsvExcelUploaderState createState() => _CsvExcelUploaderState();
 }
 
-class _CsvUploaderState extends State<CsvUploader> {
+class _CsvExcelUploaderState extends State<CsvExcelUploader> {
   List<List<dynamic>> fileData = [];
   String? fileName;
+  String? fileType;
   bool isUploading = false;
   bool isFileSelected = false;
   int uploadProgress = 0;
 
   Future<bool> _requestPermissions() async {
     if (Platform.isAndroid) {
+      if (await Permission.photos.isGranted ||
+          await Permission.videos.isGranted ||
+          await Permission.audio.isGranted) {
+        return true;
+      }
+
       Map<Permission, PermissionStatus> statuses = await [
+        Permission.photos,
         Permission.storage,
+        Permission.audio,
       ].request();
 
       if (statuses[Permission.storage]!.isDenied) {
@@ -56,16 +65,17 @@ class _CsvUploaderState extends State<CsvUploader> {
 
       if (result != null && result.files.isNotEmpty) {
         PlatformFile pickedFile = result.files.first;
-        String csvString = String.fromCharCodes(pickedFile.bytes!);
 
-        List<List<dynamic>> csvTable =
-            const CsvToListConverter().convert(csvString);
-
-        setState(() {
-          fileName = pickedFile.name;
-          fileData = csvTable;
-          isFileSelected = true;
-        });
+        if (pickedFile.extension == "csv") {
+          (pickedFile);
+          setState(() {
+            fileName = pickedFile.name;
+            fileType = pickedFile.extension;
+            isFileSelected = true;
+          });
+        } else {
+          throw Exception("Unsupported file format: ${pickedFile.extension}");
+        }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -89,17 +99,6 @@ class _CsvUploaderState extends State<CsvUploader> {
   }
 
   Future<void> exportToFirebase() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("User not authenticated ❌"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     if (fileData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -117,27 +116,43 @@ class _CsvUploaderState extends State<CsvUploader> {
 
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      String userId = user.uid;
-      CollectionReference userCollection =
-          firestore.collection('users').doc(userId).collection('csv_data');
 
+      // Get headers from the first row
       List<String> headers = fileData[0].map((e) => e.toString()).toList();
-      List<List<dynamic>> dataRows = fileData.sublist(1); // Skip headers
+      List<dynamic> dataRows = fileData[0].sublist(1); // Remove header row
 
       int processedRows = 0;
 
       for (var row in dataRows) {
-        String documentId = row[0].toString().trim().replaceAll(" ", "_");
+        // Here, we use the user's Name (column 0) as the document ID.
+        String documentId = row[0]
+            .toString()
+            .trim()
+            .replaceAll(" ", "_"); // Assuming 'Name' is in column 0
+
+        // Generate a reference to the user's document using their unique documentId
+        DocumentReference docRef =
+            firestore.collection('csv_data').doc(documentId);
 
         Map<String, dynamic> rowData = {};
 
+        // Add data for each column
         for (int j = 0; j < headers.length && j < row.length; j++) {
-          rowData[headers[j]] = row[j];
+          var value = row[j];
+          if (value is String) {
+            // Try to convert numeric strings to numbers
+            double? numValue = double.tryParse(value);
+            rowData[headers[j]] = numValue ?? value;
+          } else {
+            rowData[headers[j]] = value;
+          }
         }
 
-        await userCollection.doc(documentId).set(rowData);
+        // Set data for the user's document
+        await docRef.set(rowData);
 
         processedRows++;
+
         setState(() {
           uploadProgress = ((processedRows / dataRows.length) * 100).round();
         });
@@ -185,11 +200,27 @@ class _CsvUploaderState extends State<CsvUploader> {
                   onPressed: isUploading ? null : pickFile,
                   icon: const Icon(Icons.file_upload),
                   label: const Text("Select CSV File 📂"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 15),
+                  ),
                 ),
-                ElevatedButton.icon(
-                  onPressed: isUploading ? null : exportToFirebase,
-                  icon: const Icon(Icons.cloud_upload),
-                  label: Text(isUploading ? "Uploading..." : "Export 🚀"),
+                SizedBox(
+                  width: 90,
+                  child: ElevatedButton.icon(
+                    onPressed: () => exportToFirebase(),
+                    icon: const Icon(Icons.cloud_upload),
+                    label: Text(
+                      isUploading ? "Exporting..." : "Export 🚀",
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 15),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -205,6 +236,13 @@ class _CsvUploaderState extends State<CsvUploader> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "Type: ${fileType?.toUpperCase() ?? 'Unknown'}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
                         ),
                       ),
                       if (isUploading) ...[
@@ -229,13 +267,21 @@ class _CsvUploaderState extends State<CsvUploader> {
                               style:
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
-                            subtitle: Text(fileData[index].join(", ")),
+                            subtitle: Text(
+                              fileData[index].join(", "),
+                              style: TextStyle(
+                                color: index == 0 ? Colors.blue : null,
+                              ),
+                            ),
                           );
                         },
                       ),
                     )
                   : const Center(
-                      child: Text("No file selected."),
+                      child: Text(
+                        "",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
             ),
           ],
