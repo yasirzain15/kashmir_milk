@@ -21,9 +21,13 @@
 
     <application
         android:label="kashmeer_milk"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true">
+        android:icon="@mipmap/ic_launcher">
+
+        <!-- ✅ Disable Impeller to fix black screen issue -->
+        <meta-data android:name="flutter.embedding.android.disableImpeller" android:value="true"/>
+        
+        <!-- ✅ Required Flutter metadata -->
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
 
         <activity
             android:name=".MainActivity"
@@ -33,7 +37,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
-            
+
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme"/>
@@ -44,9 +48,6 @@
             </intent-filter>
         </activity>
 
-        <!-- ✅ Required Flutter metadata -->
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2"/>
     </application>
+
 </manifest>
