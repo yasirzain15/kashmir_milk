@@ -14,7 +14,7 @@ class CsvExcelUploader extends StatefulWidget {
 }
 
 class _CsvExcelUploaderState extends State<CsvExcelUploader> {
-  List<Map<String, dynamic>> fileData = [];
+  List<Map<String, dynamic>?> fileData = [];
   String? fileName;
   bool isUploading = false;
   int uploadProgress = 0;
@@ -29,9 +29,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     if (result == null || result.files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("No file selected ❌"),
-          backgroundColor: Colors.red,
-        ),
+            content: Text("No file selected ❌"), backgroundColor: Colors.red),
       );
       return;
     }
@@ -41,26 +39,28 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       String csvString = utf8.decode(pickedFile.bytes!);
       fileName = pickedFile.name;
 
-      // Debug: Print CSV string to verify contents
       print("CSV content: $csvString");
 
       List<List<dynamic>> csvTable =
-          const CsvToListConverter().convert(csvString);
+          const CsvToListConverter(eol: '\n').convert(csvString);
 
-      if (csvTable.isEmpty) {
-        throw Exception("CSV file is empty");
-      }
+      if (csvTable.isEmpty) throw Exception("CSV file is empty");
 
-      // Debug: Print CSV Table to verify parsing
       print("CSV Table: $csvTable");
 
-      List<String> headers = csvTable.first.map((e) => e.toString()).toList();
-      List<Map<String, dynamic>> dataList = csvTable
-          .skip(1)
-          .map((row) => Map<String, dynamic>.fromIterables(headers, row))
+      List<String> headers =
+          csvTable.first.map((e) => e.toString().trim()).toList();
+      List<Map<String, dynamic>?> dataList = csvTable
+          .map((row) {
+            if (row.length != headers.length) {
+              print("Skipping row due to incorrect column count: $row");
+              return null;
+            }
+            return Map<String, dynamic>.fromIterables(headers, row);
+          })
+          .where((element) => element != null)
           .toList();
 
-      // Debug: Print parsed dataList
       print("Parsed data: $dataList");
 
       setState(() {
@@ -69,16 +69,14 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("File successfully loaded ✅"),
-          backgroundColor: Colors.green,
-        ),
+            content: Text("File successfully loaded ✅"),
+            backgroundColor: Colors.green),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error reading CSV ❌ $e"),
-          backgroundColor: Colors.red,
-        ),
+            content: Text("Error reading CSV ❌ $e"),
+            backgroundColor: Colors.red),
       );
     }
   }
@@ -101,19 +99,20 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
 
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      String userId =
-          "user_123"; // 🔹 Replace with actual Firebase Authentication UID
 
-      CollectionReference userCollection =
-          firestore.collection('users').doc(userId).collection('csv_data');
+      CollectionReference userCollection = firestore.collection('csv_data');
 
+      int totalRows = fileData.length;
       int processedRows = 0;
+
       for (var row in fileData) {
+        // Upload each row as a separate document
         await userCollection.add(row);
         processedRows++;
 
+        // Update progress
         setState(() {
-          uploadProgress = ((processedRows / fileData.length) * 100).round();
+          uploadProgress = ((processedRows / totalRows) * 100).round();
         });
       }
 
