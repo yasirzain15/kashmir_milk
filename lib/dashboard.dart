@@ -1,9 +1,12 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/add_customer.dart';
 import 'package:kashmeer_milk/multiple_entries.dart';
-import 'package:kashmeer_milk/seeall_screen.dart';
+import 'package:kashmeer_milk/recent_customers.dart';
+import 'package:kashmeer_milk/see_all_screen.dart';
 
 // You'll need to add this package
 
@@ -53,13 +56,23 @@ class DashboardScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "Recent Customers",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Color(0xff1976d2),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RecentCustomers(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "Recent Customers",
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Color(0xff1976d2),
+                        ),
                       ),
                     ),
                   ),

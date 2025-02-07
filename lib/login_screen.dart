@@ -4,7 +4,7 @@ import 'package:kashmeer_milk/auth_ser.dart';
 import 'package:kashmeer_milk/dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
-  LoginScreen({super.key});
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
