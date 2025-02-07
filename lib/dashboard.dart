@@ -99,11 +99,12 @@ class DashboardScreen extends StatelessWidget {
 
               // Customer List
               Expanded(
-                child: ListView.builder(
+                child: ListView.separated(
                   itemCount: 2,
                   itemBuilder: (context, index) {
-                    return buildCustomerItem();
+                    return buildCustomerItem("Anum");
                   },
+                  separatorBuilder: (context, index) => Divider(),
                 ),
               ),
 
@@ -339,69 +340,52 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget buildCustomerItem() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 25,
-            backgroundImage: AssetImage('assets/ahmad.png'),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "05:00 PM",
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text(
-                      "1/2 Liter",
-                      style: TextStyle(
-                        color: Color(0xff78c1f3),
-                        fontSize: 12,
-                      ),
-                    ),
-                    Icon(Icons.more_horiz),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Anum Fatima',
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: Color(0xff12121f),
-                    ),
-                  ),
-                ),
-                Text(
-                  "House no 203, Street 92, G11/3",
-                  style: GoogleFonts.poppins(
-                    textStyle: TextStyle(
+  Widget buildCustomerItem(String name) {
+    return Row(
+      children: [
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "1/2 Liter",
+                    style: TextStyle(
+                      color: Color(0xff78c1f3),
                       fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff000000),
                     ),
                   ),
+                  Icon(Icons.more_horiz),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                name,
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: Color(0xff12121f),
+                  ),
                 ),
-              ],
-            ),
+              ),
+              Text(
+                "House no 203, Street 92, G11/3",
+                style: GoogleFonts.poppins(
+                  textStyle: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xff000000),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -35,7 +35,7 @@ class _RecentCustomersState extends State<RecentCustomers> {
                     shrinkWrap: true,
                     itemCount: 34,
                     itemBuilder: (context, index) {
-                      return DashboardScreen().buildCustomerItem();
+                      return DashboardScreen().buildCustomerItem("");
                     })
               ],
             ),

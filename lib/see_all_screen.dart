@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dashboard.dart';
@@ -10,6 +11,24 @@ class SeeallScreen extends StatefulWidget {
 }
 
 class _SeeallScreenState extends State<SeeallScreen> {
+  List<Map<String, dynamic>> customers = [];
+  getall() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+    CollectionReference userCollection = firestore.collection('csv_data');
+    final response = await userCollection.get();
+    setState(() {
+      customers = response.docs.map((customer) {
+        return customer.data() as Map<String, dynamic>;
+      }).toList();
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getall();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,13 +52,17 @@ class _SeeallScreenState extends State<SeeallScreen> {
             padding: const EdgeInsets.all(30),
             child: Column(
               children: [
-                ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: 34,
-                    itemBuilder: (context, index) {
-                      return DashboardScreen().buildCustomerItem();
-                    })
+                customers.isEmpty
+                    ? SizedBox()
+                    : ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: customers.length,
+                        itemBuilder: (context, index) {
+                          return DashboardScreen()
+                              .buildCustomerItem(customers[index]["Full Name"]);
+                        },
+                      )
               ],
             ),
           ),
