@@ -24,7 +24,13 @@ class DashboardScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Top Bar
-             
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () {},
+                  ),
                   Text(
                     "Good Morning, Abdul!",
                     style: GoogleFonts.poppins(
@@ -263,6 +269,8 @@ class DashboardScreen extends StatelessWidget {
         width: 327,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage('assets/bg.png'), fit: BoxFit.cover),
           gradient: LinearGradient(
             colors: [Colors.blue[400]!, Colors.blue[300]!],
             begin: Alignment.topLeft,
