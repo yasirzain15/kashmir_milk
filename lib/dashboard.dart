@@ -41,7 +41,6 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Spacer(),
                 ],
               ),
               const SizedBox(height: 20),

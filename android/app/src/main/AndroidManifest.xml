@@ -24,7 +24,7 @@
         android:icon="@mipmap/ic_launcher">
 
         <!-- ✅ Disable Impeller to fix black screen issue -->
-        <meta-data android:name="flutter.embedding.android.disableImpeller" android:value="true"/>
+        <meta-data android:name="flutter.renderer" android:value="opengl"/>
         
         <!-- ✅ Required Flutter metadata -->
         <meta-data android:name="flutterEmbedding" android:value="2"/>
