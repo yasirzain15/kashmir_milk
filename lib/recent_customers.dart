@@ -16,23 +16,20 @@ class _RecentCustomersState extends State<RecentCustomers> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+          title: Text(
+            'Recent Customers',
+            style: TextStyle(
+              color: Color(0xffffffff),
+            ),
+          ),
+        ),
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(30),
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search for customers',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
                 ListView.builder(
                     physics: NeverScrollableScrollPhysics(),
                     shrinkWrap: true,

@@ -173,8 +173,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Sign In Button with Loading Indicator
                 GestureDetector(
-                  onTap:
-                      isLoading ? null : _signIn, // Disable button if loading
+                  onTap: isLoading
+                      ? null
+                      : () {
+                          FocusScope.of(context)
+                              .unfocus(); // Disable button if loading
+                          _signIn();
+                        },
                   child: Container(
                     height: 36.53,
                     width: 300,
