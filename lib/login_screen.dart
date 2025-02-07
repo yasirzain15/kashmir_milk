@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/auth_ser.dart';
@@ -75,35 +77,77 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 40),
 
                 // Email TextField
-                TextField(
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    prefixIcon: const Icon(Icons.email_outlined),
-                    filled: true,
-                    fillColor: const Color(0xffffffff),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                Container(
+                  height: 51,
+                  width: 311,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xff000000).withOpacity(0.25),
+                        blurRadius: 9,
+                        spreadRadius: 0,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.emailAddress,
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'Username ',
+                      hintStyle: GoogleFonts.montserrat(
+                        textStyle: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xffafafbd),
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.email_outlined,
+                        color: Color(0xffaaaaaa),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffffffff),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
 
                 // Password TextField
-                TextField(
-                  keyboardType: TextInputType.visiblePassword,
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    filled: true,
-                    fillColor: const Color(0xffffffff),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                Container(
+                  height: 51,
+                  width: 311,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0xff000000).withOpacity(0.25),
+                        blurRadius: 9,
+                        spreadRadius: 0,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: TextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    controller: _passwordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'password',
+                      hintStyle: GoogleFonts.montserrat(
+                        textStyle: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xffafafbd),
+                        ),
+                      ),
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Color(0xffaaaaaa),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffffffff),
                     ),
                   ),
                 ),

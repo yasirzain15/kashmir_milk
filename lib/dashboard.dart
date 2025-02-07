@@ -20,172 +20,208 @@ class DashboardScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top Bar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {},
-                  ),
-                  Text(
-                    "Good Morning, Abdul!",
-                    style: GoogleFonts.poppins(
-                      textStyle: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Color(0xff78c1f3),
-                      ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.menu),
+                      onPressed: () {},
                     ),
-                  ),
-                  Spacer(),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Stats Cards
-              _buildStatsCard("Our Customers", "306.98"),
-              const SizedBox(height: 16),
-              _buildStatsCard("Our Areas", "306.98"),
-              const SizedBox(height: 24),
-
-              // Recent Customers Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecentCustomers(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Recent Customers",
+                    Text(
+                      "Good Morning, Abdul!",
                       style: GoogleFonts.poppins(
                         textStyle: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Color(0xff1976d2),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Color(0xff78c1f3),
                         ),
                       ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Stats Cards
+                _buildStatsCard("Our Customers", "306.98"),
+                const SizedBox(height: 16),
+                _buildStatsCard("Our Areas", "306.98"),
+                const SizedBox(height: 24),
+
+                // Recent Customers Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => SeeallScreen()));
-                    },
-                    child: Text(
-                      "See all",
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Color(0xff1976d2),
+                            builder: (context) => RecentCustomers(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "Recent Customers",
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Color(0xff1976d2),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-
-              // Customer List
-              Expanded(
-                child: ListView.builder(
-                  itemCount: 2,
-                  itemBuilder: (context, index) {
-                    return buildCustomerItem();
-                  },
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SeeallScreen()));
+                      },
+                      child: Text(
+                        "See all",
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                            color: Color(0xff1976d2),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                SizedBox(height: 16),
 
-              // Bottom Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: PopupMenuButton(
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          value: 1,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      CustomerRegistrationForm(),
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              title: Text(
-                                'Single Entry',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                    color: Color(0xff292929),
+                // Customer List
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 2,
+                    itemBuilder: (context, index) {
+                      return buildCustomerItem();
+                    },
+                  ),
+                ),
+
+                // Bottom Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: PopupMenuButton(
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 1,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        CustomerRegistrationForm(),
+                                  ),
+                                );
+                              },
+                              child: ListTile(
+                                title: Text(
+                                  'Single Entry',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: Color(0xff292929),
+                                    ),
                                   ),
                                 ),
-                              ),
-                              subtitle: Text(
-                                'Add Only One Customer',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10,
-                                    color: Color(0xffafafbd),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          value: 1,
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CsvExcelUploader(),
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              title: Text(
-                                'Multiple Entries',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                    color: Color(0xff292929),
-                                  ),
-                                ),
-                              ),
-                              subtitle: Text(
-                                'Add Multiple Customers',
-                                style: GoogleFonts.poppins(
-                                  textStyle: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    fontSize: 10,
-                                    color: Color(0xffafafbd),
+                                subtitle: Text(
+                                  'Add Only One Customer',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 10,
+                                      color: Color(0xffafafbd),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
+                          PopupMenuItem(
+                            value: 1,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CsvExcelUploader(),
+                                  ),
+                                );
+                              },
+                              child: ListTile(
+                                title: Text(
+                                  'Multiple Entries',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: Color(0xff292929),
+                                    ),
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Add Multiple Customers',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 10,
+                                      color: Color(0xffafafbd),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                        child: Container(
+                          height: 44.53,
+                          width: 175,
+                          decoration: BoxDecoration(
+                            color: Color(0xff78c1f3),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 13),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.add,
+                                  color: Color(0xffffffff),
+                                ),
+                                SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  'Add New',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16,
+                                      color: Color(0xffffffff),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
                       child: Container(
                         height: 44.53,
                         width: 175,
@@ -193,18 +229,18 @@ class DashboardScreen extends StatelessWidget {
                           color: Color(0xff78c1f3),
                         ),
                         child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 13),
+                          padding: const EdgeInsets.symmetric(horizontal: 13),
                           child: Row(
                             children: [
                               Icon(
-                                Icons.add,
+                                Icons.notification_add,
                                 color: Color(0xffffffff),
                               ),
                               SizedBox(
                                 width: 8,
                               ),
                               Text(
-                                'Add New',
+                                'Notify',
                                 style: GoogleFonts.poppins(
                                   textStyle: TextStyle(
                                     fontWeight: FontWeight.w400,
@@ -212,50 +248,16 @@ class DashboardScreen extends StatelessWidget {
                                     color: Color(0xffffffff),
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Container(
-                      height: 44.53,
-                      width: 175,
-                      decoration: BoxDecoration(
-                        color: Color(0xff78c1f3),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 13),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.notification_add,
-                              color: Color(0xffffffff),
-                            ),
-                            SizedBox(
-                              width: 8,
-                            ),
-                            Text(
-                              'Notify',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Color(0xffffffff),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

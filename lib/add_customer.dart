@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomerRegistrationForm extends StatefulWidget {
   const CustomerRegistrationForm({super.key});
@@ -104,26 +105,44 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                   controller: _nameController,
                   icon: Icons.person_outline,
                   hint: "Full Name"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _cityController,
                   icon: Icons.location_city,
                   hint: "City"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _sectorController,
                   icon: Icons.business,
                   hint: "Sector"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _streetController,
                   icon: Icons.streetview,
                   hint: "Street No"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _houseController,
                   icon: Icons.home_outlined,
                   hint: "House No"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _phoneController,
                   icon: Icons.phone,
                   hint: "Phone Number"),
+              SizedBox(
+                height: 15,
+              ),
               _buildTextField(
                   controller: _milkQuantityController,
                   icon: Icons.water_drop_outlined,
@@ -137,14 +156,23 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                 children: [
                   Text(
                     "Price/L: 220 PKR",
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                    style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xffafafbd),
+                      ),
+                    ),
                   ),
                   Text(
                     "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
-                    style: TextStyle(
-                        color: Colors.grey[600],
+                    style: GoogleFonts.montserrat(
+                      textStyle: TextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.bold),
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xffafafbd),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -182,17 +210,35 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       required String hint,
       bool isNumber = false}) {
     return Container(
-      margin: const EdgeInsets.only(top: 10),
+      height: 51,
+      width: 311,
+      decoration: BoxDecoration(
+        color: Color(0xffffffff),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0xff000000).withOpacity(0.25),
+            blurRadius: 9,
+            spreadRadius: 0,
+            offset: Offset(0, 1),
+          ),
+        ],
+      ),
       child: TextField(
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          prefixIcon: Icon(icon),
+          border: InputBorder.none,
+          prefixIcon: Icon(
+            icon,
+            color: Color(0xffafafbd),
+          ),
           hintText: hint,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
+          hintStyle: GoogleFonts.montserrat(
+            textStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xffafafbd),
+            ),
           ),
         ),
       ),
