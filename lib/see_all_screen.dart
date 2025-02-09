@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SeeallScreen extends StatefulWidget {
   const SeeallScreen({super.key});
@@ -13,15 +14,20 @@ class _SeeallScreenState extends State<SeeallScreen> {
   List<Map<String, dynamic>> customers = [];
 
   // Fetch all customers from Firestore
-  getall() async {
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-    CollectionReference userCollection = firestore.collection('csv_data');
-    final response = await userCollection.get();
-    setState(() {
-      customers = response.docs.map((customer) {
-        return customer.data() as Map<String, dynamic>;
-      }).toList();
-    });
+  Future<void> getall() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference userCollection = firestore.collection('csv_data');
+      final response = await userCollection.get();
+
+      setState(() {
+        customers = response.docs.map((customer) {
+          return customer.data() as Map<String, dynamic>;
+        }).toList();
+      });
+    } catch (e) {
+      debugPrint("Error fetching data: $e");
+    }
   }
 
   @override
@@ -33,7 +39,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffffffff),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xff78c1f3),
         title: Text(
@@ -42,97 +48,173 @@ class _SeeallScreenState extends State<SeeallScreen> {
             textStyle: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
-              color: Color(0xffffffff),
+              color: Colors.white,
             ),
           ),
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(30),
-            child: Column(
-              children: [
-                customers.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: customers.length,
-                        itemBuilder: (context, index) {
-                          // Safely access the address fields and handle null values
-                          String fullName =
-                              customers[index]["Full Name"] ?? "Unknown";
-                          String address = [
-                            customers[index]["House No"],
-                            customers[index]["Street No"],
-                            customers[index]["Sector"],
-                            customers[index]["Price/Liter"]
-                          ].where((element) => element != null).join(", ");
-                          String city = customers[index]["City"] ?? "";
-
-                          return buildCustomerItem(
-                              fullName, address, city, index);
-                        },
-                      ),
-              ],
-            ),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: customers.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : ListView.builder(
+                  itemCount: customers.length,
+                  itemBuilder: (context, index) {
+                    return buildCustomerItem(index);
+                  },
+                ),
         ),
       ),
     );
   }
 
-  // Extracting the buildCustomerItem function to avoid direct dependency on DashboardScreen
-  Widget buildCustomerItem(
-      String name, String address, String city, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      customers[index]['Price/Liter']?.toString() ?? "N/A",
-                      style: const TextStyle(
-                        color: Color(0xff78c1f3),
-                        fontSize: 12,
+  // Function to send an SMS to the customer
+  void sendMessage(int index) async {
+    try {
+      String customerName = customers[index]['Full Name'] ?? "Customer";
+      String phoneNumber =
+          customers[index]['Phone No']?.toString().trim() ?? "";
+
+      if (phoneNumber.isEmpty || phoneNumber.length < 10) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Invalid phone number for $customerName")),
+        );
+        return;
+      }
+
+      // Parsing numerical values safely
+      double? pricePerLiter =
+          double.tryParse(customers[index]['Price/Liter']?.toString() ?? "0");
+      double? quantityLiters = double.tryParse(
+          customers[index]['Quantity (Liters)']?.toString() ?? "0");
+
+      if (pricePerLiter == null ||
+          quantityLiters == null ||
+          pricePerLiter <= 0 ||
+          quantityLiters <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "Bill calculation error for $customerName. Please check the data.")),
+        );
+        return;
+      }
+
+      double totalBill = pricePerLiter * quantityLiters;
+
+      String message =
+          "Hello $customerName, your total milk bill is Rs. ${totalBill.toStringAsFixed(2)} "
+          "(Price: Rs. ${pricePerLiter.toStringAsFixed(2)}/L x ${quantityLiters.toStringAsFixed(2)}L). "
+          "Please make the payment soon. Thank you!";
+
+      Uri smsUri =
+          Uri.parse("sms:$phoneNumber?body=${Uri.encodeComponent(message)}");
+
+      if (await canLaunchUrl(smsUri)) {
+        await launchUrl(smsUri);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Could not open messaging app")),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error sending message: $e");
+    }
+  }
+
+  // Build UI for each customer item
+  Widget buildCustomerItem(int index) {
+    String name = customers[index]["Full Name"] ?? "Unknown";
+    String city = customers[index]["City"] ?? "Unknown City";
+    String address = [
+      customers[index]["House No"],
+      customers[index]["Street No"],
+      customers[index]["Sector"]
+    ].where((element) => element != null).join(", ");
+    String phone = customers[index]['Phone No']?.toString() ?? "N/A";
+    String pricePerLiter = customers[index]['Price/Liter']?.toString() ?? "N/A";
+
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Colors.black,
                       ),
                     ),
-                    const Icon(Icons.more_horiz),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  name,
-                  style: GoogleFonts.poppins(
-                    textStyle: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      color: Color(0xff12121f),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    address,
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-                ),
-                Text(
-                  address,
-                  style: GoogleFonts.poppins(
-                    textStyle: const TextStyle(
+                  const SizedBox(height: 4),
+                  Text(
+                    "City: $city",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Phone: $phone",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.blueGrey,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Price: Rs. $pricePerLiter /L",
+                    style: const TextStyle(
+                      color: Color(0xff78c1f3),
                       fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff000000),
                     ),
                   ),
+                ],
+              ),
+            ),
+            PopupMenuButton<int>(
+              onSelected: (value) {
+                if (value == 1) {
+                  sendMessage(index);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Send Message'),
                 ),
               ],
+              child: const Icon(Icons.more_horiz),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
