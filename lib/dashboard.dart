@@ -1,17 +1,32 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kashmeer_milk/add_customer.dart';
-import 'package:kashmeer_milk/multiple_entries.dart';
-import 'package:kashmeer_milk/recent_customers.dart';
-import 'package:kashmeer_milk/see_all_screen.dart';
+import 'package:kashmeer_milk/add_customer.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/multiple_entries.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/recent_customers.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/see_all_screen.dart'; // Ensure this file exists
+//import 'package:kashmeer_milk/customer_registration_form.dart'; // Ensure this file exists
+// Ensure this file exists
 
-// You'll need to add this package
-
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  // This list can be fetched from Firebase or other sources
+  final List<Map<String, String>> customers = [
+    {
+      "Full Name": "John Doe",
+      "House No Street No Sector": "House no 203, Street 92, G11/3",
+    },
+    {
+      "Full Name": "Jane Smith",
+      "House No Street No Sector": "House no 100, Street 22, F10/2",
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +44,9 @@ class DashboardScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.menu),
-                    onPressed: () {},
+                    onPressed: () {
+                      // You can add functionality to open a menu
+                    },
                   ),
                   Text(
                     "Good Morning, Abdul!",
@@ -100,9 +117,12 @@ class DashboardScreen extends StatelessWidget {
               // Customer List
               Expanded(
                 child: ListView.separated(
-                  itemCount: 2,
+                  itemCount: customers.length, // Dynamically get customer data
                   itemBuilder: (context, index) {
-                    return buildCustomerItem("Anum");
+                    return buildCustomerItem(
+                      customers[index]["Full Name"] ?? "",
+                      customers[index]['House No Street No Sector'] ?? "",
+                    );
                   },
                   separatorBuilder: (context, index) => Divider(),
                 ),
@@ -340,7 +360,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget buildCustomerItem(String name) {
+  Widget buildCustomerItem(String name, String address) {
     return Row(
       children: [
         const SizedBox(width: 12),
@@ -373,7 +393,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               Text(
-                "House no 203, Street 92, G11/3",
+                address,
                 style: GoogleFonts.poppins(
                   textStyle: TextStyle(
                     fontSize: 12,
