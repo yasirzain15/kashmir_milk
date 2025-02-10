@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -76,6 +78,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
       String phoneNumber =
           customers[index]['Phone No']?.toString().trim() ?? "";
 
+      // Validate phone number
       if (phoneNumber.isEmpty || phoneNumber.length < 10) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Invalid phone number for $customerName")),
@@ -83,11 +86,20 @@ class _SeeallScreenState extends State<SeeallScreen> {
         return;
       }
 
+      // Ensure phone number contains only digits
+      if (!RegExp(r'^[0-9]+$').hasMatch(phoneNumber)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Invalid phone number format for $customerName")),
+        );
+        return;
+      }
+
       // Parsing numerical values safely
       double? pricePerLiter =
           double.tryParse(customers[index]['Price/Liter']?.toString() ?? "0");
-      double? quantityLiters = double.tryParse(
-          customers[index]['Quantity (Liters)']?.toString() ?? "0");
+      double? quantityLiters =
+          double.tryParse(customers[index]['Milk Quantity']?.toString() ?? "0");
 
       if (pricePerLiter == null ||
           quantityLiters == null ||
@@ -111,11 +123,14 @@ class _SeeallScreenState extends State<SeeallScreen> {
       Uri smsUri =
           Uri.parse("sms:$phoneNumber?body=${Uri.encodeComponent(message)}");
 
+      // Check if device can launch SMS app
       if (await canLaunchUrl(smsUri)) {
-        await launchUrl(smsUri);
+        await launchUrl(smsUri, mode: LaunchMode.platformDefault);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Could not open messaging app")),
+          const SnackBar(
+              content: Text(
+                  "Could not open messaging app. Ensure an SMS app is installed.")),
         );
       }
     } catch (e) {
@@ -131,7 +146,9 @@ class _SeeallScreenState extends State<SeeallScreen> {
       customers[index]["House No"],
       customers[index]["Street No"],
       customers[index]["Sector"]
-    ].where((element) => element != null).join(", ");
+    ]
+        .where((element) => element != null && element.toString().isNotEmpty)
+        .join(", ");
     String phone = customers[index]['Phone No']?.toString() ?? "N/A";
     String pricePerLiter = customers[index]['Price/Liter']?.toString() ?? "N/A";
 
@@ -158,7 +175,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    address,
+                    address.isEmpty ? "No Address Provided" : address,
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontSize: 13,
