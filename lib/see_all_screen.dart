@@ -191,7 +191,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                       textStyle: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Colors.blueGrey,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -201,7 +201,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontSize: 12,
-                        color: Colors.blueGrey,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -217,6 +217,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
               ),
             ),
             PopupMenuButton<int>(
+              color: Color(0xffffffff),
               onSelected: (value) {
                 if (value == 1) {
                   sendMessage(index);

@@ -133,6 +133,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   Expanded(
                     child: PopupMenuButton(
+                      color: Color(0xffffffff),
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           value: 1,

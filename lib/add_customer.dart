@@ -88,17 +88,19 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: Text("Customer Registration"),
+      ),
+      backgroundColor: Color(0xffffffff)
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-
               // Profile Image Section (Ignored for now)
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 50),
 
               // Form Fields
               _buildTextField(
