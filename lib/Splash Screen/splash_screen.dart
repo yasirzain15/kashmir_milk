@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kashmeer_milk/login_screen.dart';
+import 'package:kashmeer_milk/Login/login_screen.dart';
+import 'package:kashmeer_milk/Splash Screen/splash_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

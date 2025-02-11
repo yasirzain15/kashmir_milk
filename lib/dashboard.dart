@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this file exists
-import 'package:kashmeer_milk/multiple_entries.dart'; // Ensure this file exists
-import 'package:kashmeer_milk/recent_customers.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/Add Customers/recent_customers.dart'; // Ensure this file exists
 import 'package:kashmeer_milk/see_all_screen.dart'; // Ensure this file exists
 //import 'package:kashmeer_milk/customer_registration_form.dart'; // Ensure this file exists
 // Ensure this file exists

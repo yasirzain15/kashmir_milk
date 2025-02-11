@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kashmeer_milk/auth_ser.dart';
+import 'package:kashmeer_milk/Authentication/auth_ser.dart';
 import 'package:kashmeer_milk/dashboard.dart';
 
 class LoginScreen extends StatefulWidget {
