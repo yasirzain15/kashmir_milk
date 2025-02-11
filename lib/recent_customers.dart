@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
+import 'package:kashmeer_milk/send_mesage.dart';
 
 class RecentCustomers extends StatefulWidget {
   const RecentCustomers({super.key});
@@ -66,6 +67,8 @@ class _RecentCustomersState extends State<RecentCustomers> {
                       city: customers[index]["city"] ?? "Unknown",
                       phone: customers[index]["phone"] ?? "Unknown",
                       mq: customers[index]["milk_quantity"] ?? "Unknown",
+                      index: index,
+                      customers: customers,
                     );
                   },
                 ),
@@ -78,17 +81,19 @@ class _RecentCustomersState extends State<RecentCustomers> {
 class CustomerItem extends StatelessWidget {
   final String name;
   final String city;
-
   final String phone;
   final String mq;
-
-  const CustomerItem({
-    Key? key,
-    required this.name,
-    required this.city,
-    required this.phone,
-    required this.mq,
-  }) : super(key: key);
+  List<Map<String, dynamic>> customers = [];
+  int index;
+  CustomerItem(
+      {Key? key,
+      required this.name,
+      required this.city,
+      required this.phone,
+      required this.mq,
+      required this.index,
+      required this.customers})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +155,9 @@ class CustomerItem extends StatelessWidget {
             ),
             PopupMenuButton<int>(
               onSelected: (value) {
-                if (value == 1) {}
+                if (value == 1) {
+                  SendMessage().sendMessage(index, customers, context);
+                }
               },
               itemBuilder: (context) => [
                 const PopupMenuItem<int>(

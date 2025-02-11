@@ -288,7 +288,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.only(left: 32, right: 31),
       child: Container(
         height: 154,
-        width: 327,
+        width: 350,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           image: DecorationImage(

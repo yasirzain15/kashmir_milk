@@ -59,6 +59,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         'milk_quantity': _milkQuantityController.text.trim(),
         'estimated_price': estimatedPrice,
         'Registration Time': FieldValue.serverTimestamp(),
+        'Price/Liter': pricePerLitre,
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,7 +93,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         automaticallyImplyLeading: true,
         title: Text("Customer Registration"),
       ),
-      backgroundColor: Color(0xffffffff)
+      backgroundColor: Color(0xffffffff),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
