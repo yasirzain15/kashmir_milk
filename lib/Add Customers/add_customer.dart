@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kashmeer_milk/dashboard.dart';
+import 'package:kashmeer_milk/functions.dart';
+import 'package:provider/provider.dart';
 
 class CustomerRegistrationForm extends StatefulWidget {
   const CustomerRegistrationForm({super.key});
@@ -190,7 +193,17 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: TextButton(
-                  onPressed: _saveCustomerData,
+                  onPressed: () async {
+                    await _saveCustomerData();
+                    final provider = Provider.of<Funs>(context, listen: false);
+                    provider.getall();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DashboardScreen(),
+                      ),
+                    );
+                  },
                   child: const Text(
                     "Add Customer",
                     style: TextStyle(

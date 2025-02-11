@@ -4,8 +4,10 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this file exists
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
-import 'package:kashmeer_milk/send_mesage.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/send_mesage.dart';
+import 'package:provider/provider.dart'; // Ensure this file exists
 //import 'package:kashmeer_milk/customer_registration_form.dart'; // Ensure this file exists
 // Ensure this file exists
 
@@ -18,30 +20,14 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   // This list can be fetched from Firebase or other sources
-  List<Map<String, dynamic>> customers = [];
 
   // Fetch all customers from Firestore
 
   @override
   void initState() {
     super.initState();
-    getall();
-  }
-
-  Future<void> getall() async {
-    try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference userCollection = firestore.collection('customers');
-      final response = await userCollection.get();
-
-      setState(() {
-        customers = response.docs.map((customer) {
-          return customer.data() as Map<String, dynamic>;
-        }).toList();
-      });
-    } catch (e) {
-      debugPrint("Error fetching data: $e");
-    }
+    final provider = Provider.of<Funs>(context, listen: false);
+    provider.getall();
   }
 
   @override
@@ -122,14 +108,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // Customer List
               Expanded(
-                child: ListView.separated(
-                  itemCount: customers.length, // Dynamically get customer data
-                  itemBuilder: (context, index) {
-                    return CustomerItem(
-                      customer: customers[index],
-                    );
-                  },
-                  separatorBuilder: (context, index) => Divider(),
+                child: Consumer<Funs>(
+                  builder: (context, provider, child) => ListView.separated(
+                    itemCount: provider
+                        .customers.length, // Dynamically get customer data
+                    itemBuilder: (context, index) {
+                      return CustomerItem(
+                        customer: provider.customers[index],
+                      );
+                    },
+                    separatorBuilder: (context, index) => Divider(),
+                  ),
                 ),
               ),
 
