@@ -64,7 +64,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
               : ListView.builder(
                   itemCount: customers.length,
                   itemBuilder: (context, index) {
-                    return buildCustomerItem(index);
+                    return buildCustomerItem(customers[index]);
                   },
                 ),
         ),
@@ -75,18 +75,18 @@ class _SeeallScreenState extends State<SeeallScreen> {
   // Function to send an SMS to the customer
 
   // Build UI for each customer item
-  Widget buildCustomerItem(int index) {
-    String name = customers[index]["Full Name"] ?? "Unknown";
-    String city = customers[index]["City"] ?? "Unknown City";
+  Widget buildCustomerItem(Map<String, dynamic> customer) {
+    String name = customer["Full Name"] ?? "Unknown";
+    String city = customer["City"] ?? "Unknown City";
     String address = [
-      customers[index]["House No"],
-      customers[index]["Street No"],
-      customers[index]["Sector"]
+      customer["House No"],
+      customer["Street No"],
+      customer["Sector"]
     ]
         .where((element) => element != null && element.toString().isNotEmpty)
         .join(", ");
-    String phone = customers[index]['Phone No']?.toString() ?? "N/A";
-    String pricePerLiter = customers[index]['Price/Liter']?.toString() ?? "N/A";
+    String phone = customer['Phone No']?.toString() ?? "N/A";
+    String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -156,7 +156,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
               color: Color(0xffffffff),
               onSelected: (value) {
                 if (value == 1) {
-                  SendMessage().sendMessage(index, customers, context);
+                  SendMessage().sendMessage(customer, context);
                 }
               },
               itemBuilder: (context) => [

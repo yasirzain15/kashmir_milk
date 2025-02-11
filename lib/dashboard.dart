@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this file exists
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
-import 'package:kashmeer_milk/Add Customers/recent_customers.dart'; // Ensure this file exists
-import 'package:kashmeer_milk/see_all_screen.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/see_all_screen.dart';
+import 'package:kashmeer_milk/send_mesage.dart'; // Ensure this file exists
 //import 'package:kashmeer_milk/customer_registration_form.dart'; // Ensure this file exists
 // Ensure this file exists
 
@@ -17,16 +18,30 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   // This list can be fetched from Firebase or other sources
-  final List<Map<String, String>> customers = [
-    {
-      "Full Name": "John Doe",
-      "House No Street No Sector": "House no 203, Street 92, G11/3",
-    },
-    {
-      "Full Name": "Jane Smith",
-      "House No Street No Sector": "House no 100, Street 22, F10/2",
-    },
-  ];
+  List<Map<String, dynamic>> customers = [];
+
+  // Fetch all customers from Firestore
+  Future<void> getall() async {
+    try {
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference userCollection = firestore.collection('customers');
+      final response = await userCollection.get();
+
+      setState(() {
+        customers = response.docs.map((customer) {
+          return customer.data() as Map<String, dynamic>;
+        }).toList();
+      });
+    } catch (e) {
+      debugPrint("Error fetching data: $e");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getall();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,23 +87,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RecentCustomers(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      "Recent Customers",
-                      style: GoogleFonts.poppins(
-                        textStyle: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                          color: Color(0xff1976d2),
-                        ),
+                  Text(
+                    "Recent Customers",
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Color(0xff1976d2),
                       ),
                     ),
                   ),
@@ -119,9 +124,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: ListView.separated(
                   itemCount: customers.length, // Dynamically get customer data
                   itemBuilder: (context, index) {
-                    return buildCustomerItem(
-                      customers[index]["Full Name"] ?? "",
-                      customers[index]['House No Street No Sector'] ?? "",
+                    return CustomerItem(
+                      customer: customers[index],
                     );
                   },
                   separatorBuilder: (context, index) => Divider(),
@@ -407,6 +411,88 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class CustomerItem extends StatelessWidget {
+  Map<String, dynamic> customer;
+
+  CustomerItem({Key? key, required this.customer}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      elevation: 3,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer['Full Name'] ?? "Unknown",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const SizedBox(height: 4),
+                  Text(
+                    "City: ${customer['City'] ?? "Unknown"}",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Phone: ${customer['Phone No'] ?? "Unknown"}",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "Milk Quantity: ${customer['Milk Quantity'] ?? "Unknown"}",
+                    style: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xff78c1f3),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            PopupMenuButton<int>(
+              onSelected: (value) {
+                SendMessage().sendMessage(customer, context);
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem<int>(
+                  value: 1,
+                  child: Text('Send Message'),
+                ),
+              ],
+              child: const Icon(Icons.more_horiz),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
