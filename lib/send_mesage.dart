@@ -6,7 +6,8 @@ class SendMessage {
       BuildContext context) async {
     try {
       String customerName = customers[index]['Full Name'] ?? "Customer";
-      String phoneNumber = customers[index]['phone']?.toString().trim() ?? "";
+      String phoneNumber =
+          customers[index]['Phone No']?.toString().trim() ?? "";
 
       // Validate phone number
       if (phoneNumber.isEmpty || phoneNumber.length < 10) {
@@ -29,7 +30,7 @@ class SendMessage {
       double? pricePerLiter =
           double.tryParse(customers[index]['Price/Liter']?.toString() ?? "0");
       double? quantityLiters =
-          double.tryParse(customers[index]['milk_quantity']?.toString() ?? "0");
+          double.tryParse(customers[index]['Milk Quantity']?.toString() ?? "0");
 
       if (pricePerLiter == null ||
           quantityLiters == null ||

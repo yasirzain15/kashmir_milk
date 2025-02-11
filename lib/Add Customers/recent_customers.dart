@@ -63,10 +63,10 @@ class _RecentCustomersState extends State<RecentCustomers> {
                   itemCount: customers.length,
                   itemBuilder: (context, index) {
                     return CustomerItem(
-                      name: customers[index]["name"] ?? "Unknown",
-                      city: customers[index]["city"] ?? "Unknown",
-                      phone: customers[index]["phone"] ?? "Unknown",
-                      mq: customers[index]["milk_quantity"] ?? "Unknown",
+                      name: customers[index]["Full Name"] ?? "Unknown",
+                      city: customers[index]["City"] ?? "Unknown",
+                      phone: customers[index]["Phone No"] ?? "Unknown",
+                      mq: customers[index]["Milk Quantity"] ?? "Unknown",
                       index: index,
                       customers: customers,
                     );

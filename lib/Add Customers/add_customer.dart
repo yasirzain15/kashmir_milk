@@ -50,13 +50,13 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
     try {
       await _firestore.collection('customers').add({
-        'name': _nameController.text.trim(),
-        'city': _cityController.text.trim(),
-        'sector': _sectorController.text.trim(),
-        'street': _streetController.text.trim(),
-        'house': _houseController.text.trim(),
-        'phone': _phoneController.text.trim(),
-        'milk_quantity': _milkQuantityController.text.trim(),
+        'Full Name': _nameController.text.trim(),
+        'City': _cityController.text.trim(),
+        'Sector': _sectorController.text.trim(),
+        'Street No': _streetController.text.trim(),
+        'House No': _houseController.text.trim(),
+        'Phone No': _phoneController.text.trim(),
+        'Milk Quantity': _milkQuantityController.text.trim(),
         'estimated_price': estimatedPrice,
         'Registration Time': FieldValue.serverTimestamp(),
         'Price/Liter': pricePerLitre,
