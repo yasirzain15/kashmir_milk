@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:kashmeer_milk/firebase_options.dart';
-import 'package:kashmeer_milk/splash_screen.dart';
+import 'package:kashmeer_milk/Splash screen/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
