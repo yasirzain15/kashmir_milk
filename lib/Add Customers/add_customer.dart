@@ -101,7 +101,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             children: [
               // Profile Image Section (Ignored for now)
 
-              const SizedBox(height: 50),
+              const SizedBox(height: 90),
 
               // Form Fields
               _buildTextField(

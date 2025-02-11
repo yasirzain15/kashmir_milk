@@ -21,6 +21,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Map<String, dynamic>> customers = [];
 
   // Fetch all customers from Firestore
+
+  @override
+  void initState() {
+    super.initState();
+    getall();
+  }
+
   Future<void> getall() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -35,12 +42,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (e) {
       debugPrint("Error fetching data: $e");
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getall();
   }
 
   @override
