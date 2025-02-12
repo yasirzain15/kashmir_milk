@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_referenced_packages, avoid_print
 
 import 'dart:convert';
 import 'package:csv/csv.dart';
@@ -51,6 +51,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       List<String> headers =
           csvTable.first.map((e) => e.toString().trim()).toList();
       List<Map<String, dynamic>?> dataList = csvTable
+          .skip(1)
           .map((row) {
             if (row.length != headers.length) {
               print("Skipping row due to incorrect column count: $row");
@@ -142,32 +143,34 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       appBar: AppBar(title: const Text("CSV Uploader to Firestore 📂")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            ElevatedButton.icon(
-              onPressed: pickFile,
-              icon: const Icon(Icons.file_upload),
-              label: const Text("Select CSV File 📂"),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton.icon(
-              onPressed: exportToFirebase,
-              icon: const Icon(Icons.cloud_upload),
-              label: Text(isUploading ? "Exporting..." : "Export 🚀"),
-            ),
-            const SizedBox(height: 20),
-            if (fileName != null) ...[
-              Text("Selected File: $fileName"),
-              if (isUploading)
-                Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    LinearProgressIndicator(value: uploadProgress / 100),
-                    Text("Upload Progress: $uploadProgress%"),
-                  ],
-                ),
+        child: Center(
+          child: Column(
+            children: [
+              ElevatedButton.icon(
+                onPressed: pickFile,
+                icon: const Icon(Icons.file_upload),
+                label: const Text("Select CSV File 📂"),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                onPressed: exportToFirebase,
+                icon: const Icon(Icons.cloud_upload),
+                label: Text(isUploading ? "Exporting..." : "Export 🚀"),
+              ),
+              const SizedBox(height: 20),
+              if (fileName != null) ...[
+                Text("Selected File: $fileName"),
+                if (isUploading)
+                  Column(
+                    children: [
+                      const SizedBox(height: 10),
+                      LinearProgressIndicator(value: uploadProgress / 100),
+                      Text("Upload Progress: $uploadProgress%"),
+                    ],
+                  ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

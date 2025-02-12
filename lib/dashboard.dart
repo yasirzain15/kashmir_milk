@@ -408,7 +408,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class CustomerItem extends StatelessWidget {
   Map<String, dynamic> customer;
 
-  CustomerItem({Key? key, required this.customer}) : super(key: key);
+  CustomerItem({super.key, required this.customer});
 
   @override
   Widget build(BuildContext context) {

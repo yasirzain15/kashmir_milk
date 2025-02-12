@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SeeallScreen extends StatefulWidget {
   const SeeallScreen({super.key});
