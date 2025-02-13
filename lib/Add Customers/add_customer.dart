@@ -37,10 +37,12 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     _milkQuantityController.addListener(_updateEstimatedPrice);
   }
 
-  // Function to update estimated price dynamically
   Future<bool> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-    return connectivityResult != ConnectivityResult.none;
+
+    // Returns true only if there is an internet connection (WiFi or Mobile Data)
+    return connectivityResult == ConnectivityResult.wifi ||
+        connectivityResult == ConnectivityResult.mobile;
   }
 
   void _updateEstimatedPrice() {
@@ -70,6 +72,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       pricePerLiter: pricePerLitre,
     );
     final isConnected = await _checkInternetConnection();
+
     if (isConnected) {
       try {
         await _firestore.collection('customers').add({
@@ -90,13 +93,6 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         );
 
         // Clear the fields after saving
-        _nameController.clear();
-        _cityController.clear();
-        _sectorController.clear();
-        _streetController.clear();
-        _houseController.clear();
-        _phoneController.clear();
-        _milkQuantityController.clear();
 
         // Reset estimated price
         setState(() {
@@ -113,6 +109,13 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No Internet! Saved Offline.")),
       );
+      _nameController.clear();
+      _cityController.clear();
+      _sectorController.clear();
+      _streetController.clear();
+      _houseController.clear();
+      _phoneController.clear();
+      _milkQuantityController.clear();
     }
   }
 
