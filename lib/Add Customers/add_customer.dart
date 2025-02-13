@@ -1,10 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, unrelated_type_equality_checks
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/dashboard.dart';
 import 'package:kashmeer_milk/functions.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:provider/provider.dart';
 
 class CustomerRegistrationForm extends StatefulWidget {
@@ -35,6 +38,11 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   }
 
   // Function to update estimated price dynamically
+  Future<bool> _checkInternetConnection() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    return connectivityResult != ConnectivityResult.none;
+  }
+
   void _updateEstimatedPrice() {
     setState(() {
       double quantity = double.tryParse(_milkQuantityController.text) ?? 0.0;
@@ -50,41 +58,60 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       );
       return;
     }
+    final customer = Customer(
+      name: _nameController.text.trim(),
+      city: _cityController.text.trim(),
+      sector: _sectorController.text.trim(),
+      streetNo: _streetController.text.trim(),
+      houseNo: _houseController.text.trim(),
+      phoneNo: _phoneController.text.trim(),
+      milkQuantity: _milkQuantityController.text.trim(),
+      estimatedPrice: estimatedPrice,
+      pricePerLiter: pricePerLitre,
+    );
+    final isConnected = await _checkInternetConnection();
+    if (isConnected) {
+      try {
+        await _firestore.collection('customers').add({
+          'Full Name': _nameController.text.trim(),
+          'City': _cityController.text.trim(),
+          'Sector': _sectorController.text.trim(),
+          'Street No': _streetController.text.trim(),
+          'House No': _houseController.text.trim(),
+          'Phone No': _phoneController.text.trim(),
+          'Milk Quantity': _milkQuantityController.text.trim(),
+          'estimated_price': estimatedPrice,
+          'Registration Time': FieldValue.serverTimestamp(),
+          'Price/Liter': pricePerLitre,
+        });
 
-    try {
-      await _firestore.collection('customers').add({
-        'Full Name': _nameController.text.trim(),
-        'City': _cityController.text.trim(),
-        'Sector': _sectorController.text.trim(),
-        'Street No': _streetController.text.trim(),
-        'House No': _houseController.text.trim(),
-        'Phone No': _phoneController.text.trim(),
-        'Milk Quantity': _milkQuantityController.text.trim(),
-        'estimated_price': estimatedPrice,
-        'Registration Time': FieldValue.serverTimestamp(),
-        'Price/Liter': pricePerLitre,
-      });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Customer Added Successfully!")),
+        );
 
+        // Clear the fields after saving
+        _nameController.clear();
+        _cityController.clear();
+        _sectorController.clear();
+        _streetController.clear();
+        _houseController.clear();
+        _phoneController.clear();
+        _milkQuantityController.clear();
+
+        // Reset estimated price
+        setState(() {
+          estimatedPrice = 0.0;
+        });
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${e.toString()}")),
+        );
+      }
+    } else {
+      var box = Hive.box('customers');
+      await box.add(customer);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Customer Added Successfully!")),
-      );
-
-      // Clear the fields after saving
-      _nameController.clear();
-      _cityController.clear();
-      _sectorController.clear();
-      _streetController.clear();
-      _houseController.clear();
-      _phoneController.clear();
-      _milkQuantityController.clear();
-
-      // Reset estimated price
-      setState(() {
-        estimatedPrice = 0.0;
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
+        const SnackBar(content: Text("No Internet! Saved Offline.")),
       );
     }
   }
@@ -196,6 +223,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                   onPressed: () async {
                     await _saveCustomerData();
                     final provider = Provider.of<Funs>(context, listen: false);
+
                     provider.getall();
                     Navigator.push(
                       context,

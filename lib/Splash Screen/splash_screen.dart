@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
+import 'package:kashmeer_milk/dashboard.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,20 +14,13 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  SplashServices splashScreen = SplashServices();
   @override
   void initState() {
     // TODO: implement initState
 
     super.initState();
-    Timer(
-      Duration(seconds: 3),
-      () {
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-            (route) => false);
-      },
-    );
+    splashScreen.isLogIn(context);
   }
 
   @override
@@ -55,5 +50,33 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ],
         ));
+  }
+}
+
+class SplashServices {
+  void isLogIn(BuildContext context) {
+    final auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+    if (user != null) {
+      Timer(
+        Duration(seconds: 3),
+        () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => DashboardScreen()),
+              (route) => false);
+        },
+      );
+    } else {
+      Timer(
+        Duration(seconds: 3),
+        () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+              (route) => false);
+        },
+      );
+    }
   }
 }
