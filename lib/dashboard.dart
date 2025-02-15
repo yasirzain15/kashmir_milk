@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -29,7 +27,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   void initState() {
     super.initState();
     final provider = Provider.of<Funs>(context, listen: false);
-    provider.getall();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      // provider.getall();
+      provider.getFromHive();
+    });
   }
 
   @override

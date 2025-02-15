@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/adapters.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:kashmeer_milk/FireBase/firebase_options.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:kashmeer_milk/Splash Screen/splash_screen.dart';
@@ -11,8 +10,8 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  await Hive.openBox('customers');
   Hive.registerAdapter(CustomerAdapter());
+  await Hive.openBox<Customer>('customers');
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

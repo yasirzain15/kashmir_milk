@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, unrelated_type_equality_checks
+// ignore_for_file: use_build_context_synchronously, unrelated_type_equality_checks, deprecated_member_use
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import 'package:kashmeer_milk/dashboard.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 class CustomerRegistrationForm extends StatefulWidget {
   const CustomerRegistrationForm({super.key});
@@ -40,9 +41,39 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   Future<bool> _checkInternetConnection() async {
     var connectivityResult = await Connectivity().checkConnectivity();
 
-    // Returns true only if there is an internet connection (WiFi or Mobile Data)
-    return connectivityResult == ConnectivityResult.wifi ||
-        connectivityResult == ConnectivityResult.mobile;
+    // Check if the device is connected to WiFi or Mobile Data
+    if (connectivityResult == ConnectivityResult.none) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No Internet Connection")),
+      );
+      return false;
+    }
+
+    // Try pinging Google to check actual internet access
+    try {
+      final response = await http
+          .get(Uri.parse('https://www.google.com'))
+          .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "Internet Connected via ${connectivityResult == ConnectivityResult.wifi ? "WiFi" : "Mobile Data"}")),
+        );
+        return true; // Internet is working
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No Internet: Failed to reach server")),
+        );
+        return false;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No Internet: Unable to connect")),
+      );
+      return false;
+    }
   }
 
   void _updateEstimatedPrice() {
@@ -58,6 +89,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Name and Phone Number are required!")),
       );
+
       return;
     }
     final customer = Customer(
@@ -87,6 +119,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           'Registration Time': FieldValue.serverTimestamp(),
           'Price/Liter': pricePerLitre,
         });
+        await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Customer Added Successfully!")),
@@ -104,8 +137,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         );
       }
     } else {
-      var box = Hive.box('customers');
+      var box = Hive.box<Customer>('customers');
       await box.add(customer);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No Internet! Saved Offline.")),
       );
@@ -224,10 +258,32 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                 ),
                 child: TextButton(
                   onPressed: () async {
-                    await _saveCustomerData();
-                    final provider = Provider.of<Funs>(context, listen: false);
+                    FocusScope.of(context).unfocus();
 
-                    provider.getall();
+                    // Validation: Check if required fields are empty
+                    if (_nameController.text.trim().isEmpty ||
+                        _phoneController.text.trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content:
+                                Text("Name and Phone Number are required!")),
+                      );
+                      return; // Stop execution if validation fails
+                    }
+
+                    await _saveCustomerData(); // Save customer data
+
+                    final provider = Provider.of<Funs>(context, listen: false);
+                    final isConnected = await _checkInternetConnection();
+
+                    if (isConnected) {
+                      await provider.getall(); // Fetch from Firebase if online
+                    } else {
+                      await provider
+                          .getFromHive(); // Fetch from Hive if offline
+                    }
+
+                    // Navigate only after successful validation and saving
                     Navigator.push(
                       context,
                       MaterialPageRoute(
