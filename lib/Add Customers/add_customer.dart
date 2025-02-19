@@ -100,7 +100,6 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       houseNo: _houseController.text.trim(),
       phoneNo: _phoneController.text.trim(),
       milkQuantity: _milkQuantityController.text.trim(),
-      estimatedPrice: estimatedPrice,
       pricePerLiter: pricePerLitre,
     );
     final isConnected = await _checkInternetConnection();

@@ -12,6 +12,7 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(CustomerAdapter());
   await Hive.openBox<Customer>('customers');
+  await Hive.openBox<Customer>('CSV customers');
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

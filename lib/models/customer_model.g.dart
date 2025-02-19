@@ -24,7 +24,6 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       houseNo: fields[4] as String,
       phoneNo: fields[5] as String,
       milkQuantity: fields[6] as String,
-      estimatedPrice: fields[7] as double,
       pricePerLiter: fields[8] as double,
     );
   }
@@ -32,7 +31,7 @@ class CustomerAdapter extends TypeAdapter<Customer> {
   @override
   void write(BinaryWriter writer, Customer obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -47,8 +46,6 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       ..write(obj.phoneNo)
       ..writeByte(6)
       ..write(obj.milkQuantity)
-      ..writeByte(7)
-      ..write(obj.estimatedPrice)
       ..writeByte(8)
       ..write(obj.pricePerLiter);
   }
