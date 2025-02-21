@@ -63,9 +63,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  "Internet Connected via ${connectivityResult == ConnectivityResult.wifi ? "WiFi" : "Mobile Data"}")),
+          SnackBar(content: Text("Internet Connected")),
         );
         return true; // Internet is working
       } else {
@@ -125,6 +123,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           'estimated_price': estimatedPrice,
           'Registration Time': FieldValue.serverTimestamp(),
           'Price/Liter': pricePerLitre,
+          'customer_id': customerId,
         });
         await Provider.of<Funs>(context, listen: false).getall();
 
