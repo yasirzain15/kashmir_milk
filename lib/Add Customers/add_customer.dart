@@ -34,6 +34,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
   double estimatedPrice = 0.0;
   final double pricePerLitre = 220.0;
+  bool isLoading = false;
+
+  bool? isConnected;
 
   @override
   void initState() {
@@ -107,9 +110,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       pricePerLiter: pricePerLitre,
       customerId: customerId,
     );
-    final isConnected = await _checkInternetConnection();
+    isConnected = await _checkInternetConnection();
 
-    if (isConnected) {
+    if (isConnected!) {
       try {
         await _firestore.collection('customers').add({
           'Full Name': _nameController.text.trim(),
@@ -159,155 +162,169 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: Text("Customer Registration"),
-      ),
-      backgroundColor: Color(0xffffffff),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Profile Image Section (Ignored for now)
-
-              const SizedBox(height: 90),
-
-              // Form Fields
-              _buildTextField(
-                  controller: _nameController,
-                  icon: Icons.person_outline,
-                  hint: "Full Name"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _cityController,
-                  icon: Icons.location_city,
-                  hint: "City"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _sectorController,
-                  icon: Icons.business,
-                  hint: "Sector"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _streetController,
-                  icon: Icons.streetview,
-                  hint: "Street No"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _houseController,
-                  icon: Icons.home_outlined,
-                  hint: "House No"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _phoneController,
-                  icon: Icons.phone,
-                  hint: "Phone Number"),
-              SizedBox(
-                height: 15,
-              ),
-              _buildTextField(
-                  controller: _milkQuantityController,
-                  icon: Icons.water_drop_outlined,
-                  hint: "Milk Quantity",
-                  isNumber: true),
-
-              // Price Information (Dynamic Estimated Price)
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: true,
+            title: Text("Customer Registration"),
+          ),
+          backgroundColor: Color(0xffffffff),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 children: [
-                  Text(
-                    "Price/L: 220 PKR",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffafafbd),
-                      ),
-                    ),
+                  // Profile Image Section (Ignored for now)
+
+                  const SizedBox(height: 90),
+
+                  // Form Fields
+                  _buildTextField(
+                      controller: _nameController,
+                      icon: Icons.person_outline,
+                      hint: "Full Name"),
+                  SizedBox(
+                    height: 15,
                   ),
-                  Text(
-                    "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
-                    style: GoogleFonts.montserrat(
-                      textStyle: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xffafafbd),
+                  _buildTextField(
+                      controller: _cityController,
+                      icon: Icons.location_city,
+                      hint: "City"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildTextField(
+                      controller: _sectorController,
+                      icon: Icons.business,
+                      hint: "Sector"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildTextField(
+                      controller: _streetController,
+                      icon: Icons.streetview,
+                      hint: "Street No"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildTextField(
+                      controller: _houseController,
+                      icon: Icons.home_outlined,
+                      hint: "House No"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildTextField(
+                      controller: _phoneController,
+                      icon: Icons.phone,
+                      hint: "Phone Number"),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  _buildTextField(
+                      controller: _milkQuantityController,
+                      icon: Icons.water_drop_outlined,
+                      hint: "Milk Quantity",
+                      isNumber: true),
+
+                  // Price Information (Dynamic Estimated Price)
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Price/L: 220 PKR",
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xffafafbd),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
+                        style: GoogleFonts.montserrat(
+                          textStyle: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xffafafbd),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Add Customer Button
+                  const SizedBox(height: 20),
+                  Container(
+                    width: double.infinity,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.blue[400],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: TextButton(
+                      onPressed: () async {
+                        FocusScope.of(context).unfocus();
+
+                        setState(() {
+                          isLoading = true;
+                        });
+
+                        // Validation: Check if required fields are empty
+                        if (_nameController.text.trim().isEmpty ||
+                            _phoneController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    "Name and Phone Number are required!")),
+                          );
+                          return; // Stop execution if validation fails
+                        }
+
+                        await _saveCustomerData(); // Save customer data
+
+                        final provider =
+                            Provider.of<Funs>(context, listen: false);
+
+                        if (isConnected!) {
+                          await provider
+                              .getall(); // Fetch from Firebase if online
+                        } else {
+                          await provider
+                              .getFromHive(); // Fetch from Hive if offline
+                        }
+
+                        // Navigate only after successful validation and saving
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DashboardScreen(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Add Customer",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500),
                       ),
                     ),
                   ),
                 ],
               ),
-
-              // Add Customer Button
-              const SizedBox(height: 20),
-              Container(
-                width: double.infinity,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue[400],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: TextButton(
-                  onPressed: () async {
-                    FocusScope.of(context).unfocus();
-
-                    // Validation: Check if required fields are empty
-                    if (_nameController.text.trim().isEmpty ||
-                        _phoneController.text.trim().isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text("Name and Phone Number are required!")),
-                      );
-                      return; // Stop execution if validation fails
-                    }
-
-                    await _saveCustomerData(); // Save customer data
-
-                    final provider = Provider.of<Funs>(context, listen: false);
-                    final isConnected = await _checkInternetConnection();
-
-                    if (isConnected) {
-                      await provider.getall(); // Fetch from Firebase if online
-                    } else {
-                      await provider
-                          .getFromHive(); // Fetch from Hive if offline
-                    }
-
-                    // Navigate only after successful validation and saving
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DashboardScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    "Add Customer",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+        isLoading
+            ? Center(
+                child: CircularProgressIndicator(
+                    color: Colors.blue)) // Show Loader
+            : Container()
+      ],
     );
   }
 
