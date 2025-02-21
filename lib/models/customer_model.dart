@@ -25,8 +25,13 @@ class Customer {
   @HiveField(6)
   final String milkQuantity;
 
+
   @HiveField(8)
   final double pricePerLiter;
+  
+  @HiveField(9)
+  final String customerId;
+
 
   Customer({
     required this.name,
@@ -37,6 +42,8 @@ class Customer {
     required this.phoneNo,
     required this.milkQuantity,
     required this.pricePerLiter,
+    required this.customerId,
+    
   });
 
   /// Convert JSON Map to `Customer` object
@@ -50,6 +57,7 @@ class Customer {
       phoneNo: json['Phone No'].toString(),
       milkQuantity: json['Milk Quantity'].toString(),
       pricePerLiter: (json['Price/Liter'] as num).toDouble(),
+      customerId:json['customer_id'].toString(),
     );
   }
 
@@ -64,6 +72,7 @@ class Customer {
       'Phone No': phoneNo,
       'Milk Quantity': milkQuantity,
       'Price/Liter': pricePerLiter,
+      'customer_id':customerId,
     };
   }
 }

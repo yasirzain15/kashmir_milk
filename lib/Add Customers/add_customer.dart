@@ -10,6 +10,7 @@ import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 
 class CustomerRegistrationForm extends StatefulWidget {
   const CustomerRegistrationForm({super.key});
@@ -29,6 +30,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   final TextEditingController _milkQuantityController = TextEditingController();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final String customerId = const Uuid().v1();
+
   double estimatedPrice = 0.0;
   final double pricePerLitre = 220.0;
 
@@ -92,6 +95,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
       return;
     }
+
     final customer = Customer(
       name: _nameController.text.trim(),
       city: _cityController.text.trim(),
@@ -101,6 +105,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       phoneNo: _phoneController.text.trim(),
       milkQuantity: _milkQuantityController.text.trim(),
       pricePerLiter: pricePerLitre,
+      customerId: customerId,
     );
     final isConnected = await _checkInternetConnection();
 

@@ -8,7 +8,7 @@ import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
 import 'package:provider/provider.dart'; // Ensure this file exists
-//import 'package:kashmeer_milk/customer_registration_form.dart'; // Ensure this file exists
+// Ensure this file exists
 // Ensure this file exists
 
 class DashboardScreen extends StatefulWidget {
@@ -29,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final provider = Provider.of<Funs>(context, listen: false);
     Future.delayed(const Duration(milliseconds: 100), () {
       // provider.getall();
-      provider.getFromHive();
+      provider.getFromHive(); 
     });
   }
 
@@ -74,7 +74,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 24),
 
               // Recent Customers Header
-              Row(
+              Row( 
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(

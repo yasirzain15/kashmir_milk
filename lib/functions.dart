@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
+import 'package:uuid/uuid.dart';
 
 class Funs extends ChangeNotifier {
   List<Map<String, dynamic>> customers = [];
@@ -9,11 +10,16 @@ class Funs extends ChangeNotifier {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference userCollection = firestore.collection('customers');
-      final response = await userCollection.get();
+
+      final response =
+          await userCollection.get(const GetOptions(source: Source.server));
+
+      customers.clear(); // Prevent duplicates by clearing old data
 
       final firebasecustomers = response.docs.map((customer) {
         return customer.data() as Map<String, dynamic>;
       }).toList();
+
       customers.addAll(firebasecustomers);
       notifyListeners();
     } catch (e) {
@@ -25,10 +31,16 @@ class Funs extends ChangeNotifier {
     var box = Hive.box<Customer>('customers');
 
     final response = box.values;
-    final localcustomers = response.map((customer) {
-      return (customer).toJson();
-    }).toList();
-    customers.addAll(localcustomers);
+
+    // Use a Set to keep track of existing customer IDs
+    final existingCustomerIds = customers.map((e) => e['customer_id']).toSet();
+
+    final newCustomers = response
+        .where((customer) => !existingCustomerIds.contains(customer.customerId))
+        .map((customer) => customer.toJson())
+        .toList();
+
+    customers.addAll(newCustomers);
     notifyListeners();
   }
 }

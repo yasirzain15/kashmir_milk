@@ -25,13 +25,14 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       phoneNo: fields[5] as String,
       milkQuantity: fields[6] as String,
       pricePerLiter: fields[8] as double,
+      customerId: fields[9] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Customer obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class CustomerAdapter extends TypeAdapter<Customer> {
       ..writeByte(6)
       ..write(obj.milkQuantity)
       ..writeByte(8)
-      ..write(obj.pricePerLiter);
+      ..write(obj.pricePerLiter)
+      ..writeByte(9)
+      ..write(obj.customerId);
   }
 
   @override
