@@ -28,8 +28,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     final provider = Provider.of<Funs>(context, listen: false);
     Future.delayed(const Duration(milliseconds: 100), () {
-      // provider.getall();
-      provider.getFromHive(); 
+      provider.getall();
+      provider.getFromHive();
     });
   }
 
@@ -74,7 +74,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 24),
 
               // Recent Customers Header
-              Row( 
+              Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
