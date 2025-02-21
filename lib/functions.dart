@@ -11,17 +11,17 @@ class Funs extends ChangeNotifier {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference userCollection = firestore.collection('customers');
 
-      final response =
-          await userCollection.get(const GetOptions(source: Source.server));
-
-      customers.clear(); // Prevent duplicates by clearing old data
-
-      final firebasecustomers = response.docs.map((customer) {
-        return customer.data() as Map<String, dynamic>;
-      }).toList();
-
-      customers.addAll(firebasecustomers);
+      final response = await userCollection.get();
+      final existedcustomers = customers.map((e) => e['customer_id']).toSet();
+      final newCustomers = response.docs
+          .where((customer) => !existedcustomers.contains(
+              (customer.data()! as Map<String, dynamic>)['customer_id']))
+          .map((customer) => customer.data() as Map<String, dynamic>)
+          .toList();
+      customers.addAll(newCustomers);
       notifyListeners();
+
+      // customers.clear(); // Prevent duplicates by clearing old data
     } catch (e) {
       debugPrint("Error fetching data: $e");
     }

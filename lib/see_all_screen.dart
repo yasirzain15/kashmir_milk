@@ -3,6 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
 
 class SeeallScreen extends StatefulWidget {
@@ -35,7 +37,13 @@ class _SeeallScreenState extends State<SeeallScreen> {
   @override
   void initState() {
     super.initState();
-    getall();
+    final provider = Provider.of<Funs>(context, listen: false);
+    Future.delayed(const Duration(milliseconds: 100), () async {
+      getall();
+      await provider.getall();
+      await provider.getFromHive();
+      customers.addAll(provider.customers);
+    });
   }
 
   @override
