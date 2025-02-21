@@ -39,10 +39,13 @@ class _SeeallScreenState extends State<SeeallScreen> {
     super.initState();
     final provider = Provider.of<Funs>(context, listen: false);
     Future.delayed(const Duration(milliseconds: 100), () async {
-      getall();
+      await getall();
       await provider.getall();
       await provider.getFromHive();
-      customers.addAll(provider.customers);
+
+      setState(() {
+        customers.addAll(provider.customers);
+      });
     });
   }
 
