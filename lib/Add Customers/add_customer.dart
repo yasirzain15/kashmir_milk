@@ -16,6 +16,7 @@ class CustomerRegistrationForm extends StatefulWidget {
   const CustomerRegistrationForm({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CustomerRegistrationFormState createState() =>
       _CustomerRegistrationFormState();
 }
@@ -112,7 +113,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
     if (isConnected!) {
       try {
-        await _firestore.collection('customers').add({
+        await _firestore.collection('csv_data').add({
           'Full Name': _nameController.text.trim(),
           'City': _cityController.text.trim(),
           'Sector': _sectorController.text.trim(),

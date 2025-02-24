@@ -9,7 +9,7 @@ class Funs extends ChangeNotifier {
   Future<void> getall() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference userCollection = firestore.collection('customers');
+      CollectionReference userCollection = firestore.collection('csv_data');
 
       final response = await userCollection.get();
       final existedcustomers = customers.map((e) => e['customer_id']).toSet();
