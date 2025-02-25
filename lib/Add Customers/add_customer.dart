@@ -1,10 +1,12 @@
 // ignore_for_file: use_build_context_synchronously, unrelated_type_equality_checks, deprecated_member_use
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:kashmeer_milk/Authentication/auth_ser.dart';
 import 'package:kashmeer_milk/dashboard.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
@@ -113,7 +115,11 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
     if (isConnected!) {
       try {
-        await _firestore.collection('csv_data').add({
+        await _firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('customer')
+            .add({
           'Full Name': _nameController.text.trim(),
           'City': _cityController.text.trim(),
           'Sector': _sectorController.text.trim(),

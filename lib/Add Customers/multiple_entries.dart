@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
@@ -148,7 +149,10 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       if (isConnected) {
         FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-        CollectionReference userCollection = firestore.collection('csv_data');
+        CollectionReference userCollection = firestore
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('customer');
 
         for (var row in fileData) {
           // Upload each row as a separate document
