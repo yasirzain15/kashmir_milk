@@ -1,9 +1,13 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this file exists
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/Login/login_screen.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
@@ -26,11 +30,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+
     final provider = Provider.of<Funs>(context, listen: false);
     Future.delayed(const Duration(milliseconds: 100), () {
       provider.getall();
       provider.getFromHive();
     });
+  }
+
+  Future<void> _logoutUser() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Logged out successfully!")),
+      );
+
+      // Navigate to Login Screen (Replace with your actual login screen)
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => LoginScreen()));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: ${e.toString()}")),
+      );
+    }
   }
 
   @override
@@ -47,12 +69,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {
-                      // You can add functionality to open a menu
-                    },
-                  ),
                   Text(
                     "Good Morning, Abdul!",
                     style: GoogleFonts.poppins(
@@ -62,6 +78,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         color: Color(0xff78c1f3),
                       ),
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.logout_outlined,
+                      color: Color(0xffff2c2c),
+                    ),
+                    onPressed: () async {
+                      await _logoutUser();
+                      // You can add functionality to open a menu
+                    },
                   ),
                 ],
               ),
