@@ -70,7 +70,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Good Morning, Abdul!",
+                    "Good Morning, ${FirebaseAuth.instance.currentUser!.displayName}",
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         fontWeight: FontWeight.w600,
