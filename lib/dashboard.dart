@@ -23,6 +23,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  String greeting = "Hello";
   // This list can be fetched from Firebase or other sources
 
   // Fetch all customers from Firestore
@@ -36,6 +37,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       provider.getall();
       provider.getFromHive();
     });
+    updateGreeting();
+  }
+
+  void updateGreeting() {
+    int hour = DateTime.now().hour;
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good Morning";
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "Good Afternoon";
+    } else {
+      greeting = "Good Evening";
+    }
   }
 
   Future<void> _logoutUser() async {
@@ -70,7 +84,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Good Morning, ${FirebaseAuth.instance.currentUser!.displayName}",
+                    "$greeting ${FirebaseAuth.instance.currentUser!.displayName}",
                     style: GoogleFonts.poppins(
                       textStyle: TextStyle(
                         fontWeight: FontWeight.w600,
