@@ -48,7 +48,7 @@ else()
   set(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 endif()
 
-string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+string(REPLACE ";" "\n" CMAKE_INSTALL__CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 file(WRITE "D:/kashmeer_milk/android/app/.cxx/Debug/713k1z2g/arm64-v8a/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

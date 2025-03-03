@@ -83,14 +83,16 @@ class _NotifyScreenState extends State<NotifyScreen> {
     for (int i = 0; i < users.length; i++) {
       await Future.delayed(Duration(seconds: 1));
       sendSms(users[i]["phone"]!, message);
-      setState(() => progress = (i + 1) / users.length);
+      setState(() {
+        messageController.clear();
+        progress = (i + 1) / users.length;
+      });
     }
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Messages sent!")));
     setState(() {
       progress = 0.0;
-      messageController.clear();
     });
   }
 
