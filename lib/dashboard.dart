@@ -9,6 +9,7 @@ import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this f
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
 import 'package:kashmeer_milk/Login/login_screen.dart';
 import 'package:kashmeer_milk/functions.dart';
+import 'package:kashmeer_milk/message_screen.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
 import 'package:provider/provider.dart'; // Ensure this file exists
@@ -95,7 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   IconButton(
                     icon: const Icon(
-                      Icons.logout_outlined,
+                      Icons.logout,
                       color: Color(0xffff2c2c),
                     ),
                     onPressed: () async {
@@ -279,34 +280,42 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: Container(
-                      height: 44.53,
-                      width: 175,
-                      decoration: BoxDecoration(
-                        color: Color(0xff78c1f3),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 13),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.notification_add,
-                              color: Color(0xffffffff),
-                            ),
-                            SizedBox(
-                              width: 8,
-                            ),
-                            Text(
-                              'Notify',
-                              style: GoogleFonts.poppins(
-                                textStyle: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: Color(0xffffffff),
-                                ),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => NotifyScreen()));
+                      },
+                      child: Container(
+                        height: 44.53,
+                        width: 175,
+                        decoration: BoxDecoration(
+                          color: Color(0xff78c1f3),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 13),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.notification_add,
+                                color: Color(0xffffffff),
                               ),
-                            )
-                          ],
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Text(
+                                'Notify',
+                                style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16,
+                                    color: Color(0xffffffff),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ),
