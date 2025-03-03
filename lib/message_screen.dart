@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_print
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hive/hive.dart';
@@ -17,14 +19,24 @@ class _NotifyScreenState extends State<NotifyScreen> {
   bool isLoading = false;
   double progress = 0.0;
 
+  @override
+  void initState() {
+    super.initState();
+    fetchUsers();
+  }
+
   // Firebase + Hive se users fetch karna
   Future<void> fetchUsers() async {
     setState(() => isLoading = true);
 
     try {
       // Firestore se users fetch karo
-      var snapshot = await FirebaseFirestore.instance.collection('users').get();
-      List<Map<String, dynamic>> firebaseUsers = snapshot.docs
+      var snapshot = FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection('customer');
+      var querySnapshot = await snapshot.get();
+      List<Map<String, dynamic>> firebaseUsers = querySnapshot.docs
           .map((doc) => {
                 "name": doc['Full Name'],
                 "phone": doc['Phone No'],
@@ -49,7 +61,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
         ...hiveUsers
             .map((user) => user.map((k, v) => MapEntry(k, v.toString())))
       };
-      users = uniqueUsers.toList();
+      setState(() {
+        users = uniqueUsers.toList();
+      });
     } catch (e) {
       print("Error fetching users: $e");
     }
@@ -62,7 +76,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
     String message = messageController.text.trim();
     if (message.isEmpty) return;
 
-    setState(() => progress = 0.0);
+    setState(
+      () => progress = 0.0,
+    );
 
     for (int i = 0; i < users.length; i++) {
       await Future.delayed(Duration(seconds: 1));
@@ -72,16 +88,26 @@ class _NotifyScreenState extends State<NotifyScreen> {
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text("Messages sent!")));
+    setState(() {
+      progress = 0.0;
+      messageController.clear();
+    });
   }
 
   // `url_launcher` se SMS bhejna
   Future<void> sendSms(String phone, String message) async {
+    if (phone.isEmpty || message.isEmpty) {
+      print("Phone number or message is empty");
+      return;
+    }
+
     final Uri smsUri =
-        Uri(scheme: 'sms', path: phone, queryParameters: {"body": message});
+        Uri.parse("sms:$phone?body=${Uri.encodeComponent(message)}");
+
     if (await canLaunchUrl(smsUri)) {
       await launchUrl(smsUri);
     } else {
-      print("Could not launch SMS");
+      print("Could not launch SMS to $phone");
     }
   }
 
@@ -140,10 +166,11 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       },
                     ),
             ),
-            TextField(
+            TextFormField(
               controller: messageController,
               decoration: InputDecoration(
-                labelText: "Type your message here",
+                // labelText: "Type your message here",
+                hintText: 'Type your message here',
                 border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.0)),
               ),
