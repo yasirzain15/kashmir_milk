@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:kashmeer_milk/Models/customer_model.dart';
@@ -203,36 +204,107 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("CSV Uploader to Firestore 📂")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: [
-              ElevatedButton.icon(
-                onPressed: pickFile,
-                icon: const Icon(Icons.file_upload),
-                label: const Text("Select CSV File 📂"),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: exportToFirebase,
-                icon: const Icon(Icons.cloud_upload),
-                label: Text(isUploading ? "Exporting..." : "Export 🚀"),
-              ),
-              const SizedBox(height: 20),
-              if (fileName != null) ...[
-                Text("Selected File: $fileName"),
-                if (isUploading)
-                  Column(
-                    children: [
-                      const SizedBox(height: 10),
-                      LinearProgressIndicator(value: uploadProgress / 100),
-                      Text("Upload Progress: $uploadProgress%"),
-                    ],
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: Color(0xff78c1f3),
+        title: Text(
+          "Multiple Entries",
+          style: GoogleFonts.poppins(
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: pickFile,
+                  child: Container(
+                    height: 44.53,
+                    width: 175,
+                    decoration: BoxDecoration(
+                      color: Color(0xff78c1f3),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 13),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.upload_file,
+                            color: Color(0xffffffff),
+                          ),
+                          SizedBox(
+                            width: 8,
+                          ),
+                          Text(
+                            'Upload File',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 16,
+                                color: Color(0xffffffff),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
                   ),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  height: 44.53,
+                  width: 175,
+                  decoration: BoxDecoration(
+                    color: Color(0xff78c1f3),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 13),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.cloud_upload,
+                          color: Color(0xffffffff),
+                        ),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          isUploading ? "Exporting..." : "Export File",
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                              color: Color(0xffffffff),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                if (fileName != null) ...[
+                  Text("Selected File: $fileName"),
+                  if (isUploading)
+                    Column(
+                      children: [
+                        const SizedBox(height: 10),
+                        LinearProgressIndicator(value: uploadProgress / 100),
+                        Text("Upload Progress: $uploadProgress%"),
+                      ],
+                    ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

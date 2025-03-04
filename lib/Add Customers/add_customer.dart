@@ -173,7 +173,17 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
-            title: Text("Customer Registration"),
+            backgroundColor: Color(0xff78c1f3),
+            title: Text(
+              "Customer Registration",
+              style: GoogleFonts.poppins(
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white,
+                ),
+              ),
+            ),
           ),
           backgroundColor: Color(0xffffffff),
           body: SafeArea(

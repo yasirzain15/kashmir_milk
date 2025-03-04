@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -117,13 +118,18 @@ class _NotifyScreenState extends State<NotifyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: true,
+        backgroundColor: Color(0xff78c1f3),
         title: Text(
           "Notify Customers",
-          style: TextStyle(
-            color: Color(0xffffffff),
+          style: GoogleFonts.poppins(
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
           ),
         ),
-        backgroundColor: Color(0xff78c1f3),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
