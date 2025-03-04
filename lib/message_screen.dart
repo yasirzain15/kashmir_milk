@@ -205,7 +205,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   color: Color(0xff78c1f3),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: Row(
                     children: [
                       Text(
