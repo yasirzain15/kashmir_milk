@@ -135,11 +135,6 @@ class _NotifyScreenState extends State<NotifyScreen> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ElevatedButton(
-              onPressed: fetchUsers,
-              child: Text("Fetch Customers"),
-            ),
-            SizedBox(height: 10),
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
@@ -174,6 +169,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       },
                     ),
             ),
+            Row(
+              children: [],
+            ),
             TextFormField(
               controller: messageController,
               decoration: InputDecoration(
@@ -186,9 +184,44 @@ class _NotifyScreenState extends State<NotifyScreen> {
             SizedBox(height: 10),
             LinearProgressIndicator(value: progress),
             SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: sendMessages,
-              child: Text("Send Message to All"),
+            Container(
+              height: 44.53,
+              // width: 311,
+              decoration: BoxDecoration(
+                color: Color(0xffffffff),
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0xff000000).withOpacity(0.25),
+                    blurRadius: 9,
+                    spreadRadius: 0,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+              child: Container(
+                height: 44.53,
+                width: 175,
+                decoration: BoxDecoration(
+                  color: Color(0xff78c1f3),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Send Message to All',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            color: Color(0xffffffff),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),
