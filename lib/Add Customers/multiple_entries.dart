@@ -76,8 +76,9 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("File successfully loaded ✅"),
-            backgroundColor: Colors.green),
+          content: Text("File successfully loaded ✅"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,7 +95,10 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     // Check if the device is connected to WiFi or Mobile Data
     if (connectivityResult == ConnectivityResult.none) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No Internet Connection")),
+        const SnackBar(
+          content: Text("No Internet Connection"),
+          backgroundColor: Color(0xffc30010),
+        ),
       );
       return false;
     }
@@ -108,19 +112,27 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  "Internet Connected via ${connectivityResult == ConnectivityResult.wifi ? "WiFi" : "Mobile Data"}")),
+            content: Text(
+                "Internet Connected via ${connectivityResult == ConnectivityResult.wifi ? "WiFi" : "Mobile Data"}"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
         );
         return true; // Internet is working
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No Internet: Failed to reach server")),
+          const SnackBar(
+            content: Text("No Internet: Failed to reach server"),
+            backgroundColor: Color(0xffc30010),
+          ),
         );
         return false;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No Internet: Unable to connect")),
+        const SnackBar(
+          content: Text("No Internet: Unable to connect"),
+          backgroundColor: Color(0xffc30010),
+        ),
       );
       return false;
     }
@@ -184,7 +196,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Successfully exported to Local Storage"),
-          backgroundColor: Colors.green,
+          backgroundColor: Color(0xff78c1f3),
         ),
       );
     } catch (e) {
