@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, deprecated_member_use, use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -184,41 +184,46 @@ class _NotifyScreenState extends State<NotifyScreen> {
             SizedBox(height: 10),
             LinearProgressIndicator(value: progress),
             SizedBox(height: 10),
-            Container(
-              height: 44.53,
-              // width: 311,
-              decoration: BoxDecoration(
-                color: Color(0xffffffff),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0xff000000).withOpacity(0.25),
-                    blurRadius: 9,
-                    spreadRadius: 0,
-                    offset: Offset(0, 1),
-                  ),
-                ],
-              ),
+            GestureDetector(
+              onTap: () {
+                sendMessages();
+              },
               child: Container(
                 height: 44.53,
-                width: 175,
+                // width: 311,
                 decoration: BoxDecoration(
-                  color: Color(0xff78c1f3),
+                  color: Color(0xffffffff),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(0xff000000).withOpacity(0.25),
+                      blurRadius: 9,
+                      spreadRadius: 0,
+                      offset: Offset(0, 1),
+                    ),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Send Message to All',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16,
-                            color: Color(0xffffffff),
+                child: Container(
+                  height: 44.53,
+                  width: 175,
+                  decoration: BoxDecoration(
+                    color: Color(0xff78c1f3),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Send Message to All',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16,
+                              color: Color(0xffffffff),
+                            ),
                           ),
-                        ),
-                      )
-                    ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

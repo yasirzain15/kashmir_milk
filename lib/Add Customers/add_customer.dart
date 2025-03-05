@@ -65,9 +65,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Internet Connected")),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Internet Connected")),
+        // );
         return true; // Internet is working
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

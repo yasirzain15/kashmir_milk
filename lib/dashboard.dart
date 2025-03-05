@@ -25,6 +25,8 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String greeting = "Hello";
+  int totalCustomers = 0;
+  int totalSectors = 0;
   // This list can be fetched from Firebase or other sources
 
   // Fetch all customers from Firestore
@@ -37,8 +39,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Future.delayed(const Duration(milliseconds: 100), () {
       provider.getall();
       provider.getFromHive();
+      loadCustomerData();
+      loadTotalSectors();
     });
     updateGreeting();
+  }
+
+  Future<void> loadTotalSectors() async {
+    int count = await fetchTotalSectors();
+    setState(() {
+      totalSectors = count;
+    });
+  }
+
+  Future<int> fetchTotalSectors() async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('sectors') // Change to your actual collection name
+          .get();
+
+      return snapshot.size; // Returns the total number of documents (sectors)
+    } catch (e) {
+      print("Error fetching sectors: $e");
+      return 0; // Return 0 in case of error
+    }
+  }
+
+  Future<int> fetchTotalCustomers() async {
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection('customer')
+          .get();
+
+      return snapshot.docs.length; // Total customers count
+    } catch (e) {
+      print("Error fetching customers: $e");
+      return 0;
+    }
+  }
+
+  Future<void> loadCustomerData() async {
+    int count = await fetchTotalCustomers();
+    setState(() {
+      totalCustomers = count;
+    });
   }
 
   void updateGreeting() {
@@ -109,9 +155,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
 
               // Stats Cards
-              _buildStatsCard("Our Customers", "306.98"),
+              _buildStatsCard("Our Customers", "$totalCustomers"),
               const SizedBox(height: 16),
-              _buildStatsCard("Our Areas", "306.98"),
+              _buildStatsCard("Our Areas", "$totalSectors"),
               const SizedBox(height: 24),
 
               // Recent Customers Header
