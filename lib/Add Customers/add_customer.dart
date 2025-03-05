@@ -278,8 +278,15 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                     width: double.infinity,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: Color(0xff78c1f3),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xff78c1f3),
+                          Color(0xff78a2f3),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      // borderRadius: BorderRadius.circular(8),
                     ),
                     child: TextButton(
                       onPressed: () async {
