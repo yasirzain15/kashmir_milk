@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print, deprecated_member_use, use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -16,9 +15,10 @@ class NotifyScreen extends StatefulWidget {
 
 class _NotifyScreenState extends State<NotifyScreen> {
   List<Map<String, String>> users = [];
-  TextEditingController messageController = TextEditingController();
   bool isLoading = false;
   double progress = 0.0;
+
+  final double milkPricePerLiter = 220.0; // Milk price per liter
 
   @override
   void initState() {
@@ -26,12 +26,10 @@ class _NotifyScreenState extends State<NotifyScreen> {
     fetchUsers();
   }
 
-  // Firebase + Hive se users fetch karna
   Future<void> fetchUsers() async {
     setState(() => isLoading = true);
 
     try {
-      // Firestore se users fetch karo
       var snapshot = FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser?.uid)
@@ -45,7 +43,6 @@ class _NotifyScreenState extends State<NotifyScreen> {
               })
           .toList();
 
-      // Hive se users fetch karo
       var box = Hive.box<Customer>('customers');
       List<Map> hiveUsers = box.values.map((user) {
         return {
@@ -55,13 +52,13 @@ class _NotifyScreenState extends State<NotifyScreen> {
         };
       }).toList();
 
-      // Firebase + Hive users ko merge karna (duplicates hata kar)
       Set<Map<String, String>> uniqueUsers = {
         ...firebaseUsers
             .map((user) => user.map((k, v) => MapEntry(k, v.toString()))),
         ...hiveUsers
             .map((user) => user.map((k, v) => MapEntry(k, v.toString())))
       };
+
       setState(() {
         users = uniqueUsers.toList();
       });
@@ -72,45 +69,59 @@ class _NotifyScreenState extends State<NotifyScreen> {
     setState(() => isLoading = false);
   }
 
-  // Sab users ko message send karna
-  Future<void> sendMessages() async {
-    String message = messageController.text.trim();
-    if (message.isEmpty) return;
-
-    setState(
-      () => progress = 0.0,
-    );
+  Future<void> sendBillsToAll() async {
+    setState(() => progress = 0.0);
 
     for (int i = 0; i < users.length; i++) {
       await Future.delayed(Duration(seconds: 1));
+      double milkQuantity = double.tryParse(users[i]["milk"]!) ?? 0.0;
+      double totalBill = milkQuantity * milkPricePerLiter;
+      String message =
+          "Hello ${users[i]["name"]}, your total bill for ${users[i]["milk"]} liters of milk is PKR ${totalBill.toStringAsFixed(2)}.";
+
       sendSms(users[i]["phone"]!, message);
       setState(() {
-        messageController.clear();
         progress = (i + 1) / users.length;
       });
     }
 
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Messages sent!")));
+        .showSnackBar(SnackBar(content: Text("Bills sent to all customers!")));
     setState(() {
       progress = 0.0;
     });
   }
 
-  // `url_launcher` se SMS bhejna
   Future<void> sendSms(String phone, String message) async {
     if (phone.isEmpty || message.isEmpty) {
       print("Phone number or message is empty");
       return;
     }
 
+    // Normalize the phone number
+    String normalizedPhone = phone.replaceAll(
+        RegExp(r'[^0-9+]'), ''); // Remove dashes/spaces but keep '+'
+
+    // If the number starts with '03', add '+92' (Pakistan country code)
+    if (RegExp(r'^03[0-9]{9}$').hasMatch(normalizedPhone)) {
+      normalizedPhone = "+92${normalizedPhone.substring(1)}";
+    }
+
+    // Validate phone number
+    if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(normalizedPhone)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Invalid phone number format: $phone")),
+      );
+      return;
+    }
+
     final Uri smsUri =
-        Uri.parse("sms:$phone?body=${Uri.encodeComponent(message)}");
+        Uri.parse("sms:$normalizedPhone?body=${Uri.encodeComponent(message)}");
 
     if (await canLaunchUrl(smsUri)) {
       await launchUrl(smsUri);
     } else {
-      print("Could not launch SMS to $phone");
+      print("Could not launch SMS to $normalizedPhone");
     }
   }
 
@@ -169,28 +180,14 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       },
                     ),
             ),
-            Row(
-              children: [],
-            ),
-            TextFormField(
-              controller: messageController,
-              decoration: InputDecoration(
-                // labelText: "Type your message here",
-                hintText: 'Type your message here',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0)),
-              ),
-            ),
-            SizedBox(height: 10),
             LinearProgressIndicator(value: progress),
             SizedBox(height: 10),
             GestureDetector(
               onTap: () {
-                sendMessages();
+                sendBillsToAll();
               },
               child: Container(
                 height: 44.53,
-                // width: 311,
                 decoration: BoxDecoration(
                   color: Color(0xffffffff),
                   boxShadow: [
@@ -206,14 +203,22 @@ class _NotifyScreenState extends State<NotifyScreen> {
                   height: 44.53,
                   width: 175,
                   decoration: BoxDecoration(
-                    color: Color(0xff78c1f3),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff78c1f3),
+                        Color(0xff78a2f3),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Send Message to All',
+                          'Send Bills to All',
                           style: GoogleFonts.poppins(
                             textStyle: TextStyle(
                               fontWeight: FontWeight.w400,

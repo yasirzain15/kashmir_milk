@@ -7,6 +7,8 @@ import 'package:uuid/uuid.dart';
 
 class Funs extends ChangeNotifier {
   List<Map<String, dynamic>> customers = [];
+  List<String> sectors = []; // List to store sector names
+  List<int> sectorCounts = []; // Store the number of customers in each sector
   Future<void> getall() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -46,5 +48,30 @@ class Funs extends ChangeNotifier {
 
     customers.addAll(newCustomers);
     notifyListeners();
+  }
+
+  Future<void> fetchSectors() async {
+    try {
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc('your_user_id') // Replace with actual user ID
+          .collection('customer')
+          .get();
+
+      // Create a Map to count occurrences of each sector
+      Map<String, int> sectorMap = {};
+
+      for (var doc in snapshot.docs) {
+        String sector = doc['Sector'] as String;
+        sectorMap[sector] = (sectorMap[sector] ?? 0) + 1;
+      }
+
+      sectors = sectorMap.keys.toList(); // Get unique sector names
+      sectorCounts = sectorMap.values.toList(); // Get counts of each sector
+
+      notifyListeners();
+    } catch (e) {
+      print("Error fetching sectors: $e");
+    }
   }
 }

@@ -231,8 +231,14 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                     height: 44.53,
                     width: 175,
                     decoration: BoxDecoration(
-                      color: Color(0xff78c1f3),
-                    ),
+                        gradient: LinearGradient(
+                      colors: [
+                        Color(0xff78c1f3),
+                        Color(0xff78a2f3),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    )),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 13),
                       child: Row(
@@ -264,7 +270,14 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                   height: 44.53,
                   width: 175,
                   decoration: BoxDecoration(
-                    color: Color(0xff78c1f3),
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xff78c1f3),
+                        Color(0xff78a2f3),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 13),
