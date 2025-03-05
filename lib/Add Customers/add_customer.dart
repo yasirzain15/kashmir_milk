@@ -84,8 +84,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("No Internet: Unable to connect"),
-          backgroundColor: Color(0xff78c1f3),
+          content: Text("No Internet: Saved Offline !!"),
+          backgroundColor: Color(0xffc30010),
         ),
       );
       return false;
@@ -168,12 +168,12 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       var box = Hive.box<Customer>('customers');
       await box.add(customer);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No Internet! Saved Offline."),
-          backgroundColor: Color(0xff78c1f3),
-        ),
-      );
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content: Text("No Internet! Saved Offline."),
+      //     backgroundColor: Color(0xff78c1f3),
+      //   ),
+      // );
       _nameController.clear();
       _cityController.clear();
       _sectorController.clear();

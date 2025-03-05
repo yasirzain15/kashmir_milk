@@ -99,6 +99,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
     String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
     return Card(
+      color: Color(0xffffffff),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 3,
       child: Padding(

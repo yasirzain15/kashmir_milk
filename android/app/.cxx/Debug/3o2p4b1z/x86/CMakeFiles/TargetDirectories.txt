@@ -1,0 +1,2 @@
+D:/Projects/kashmeer_milk/android/app/.cxx/Debug/3o2p4b1z/x86/CMakeFiles/edit_cache.dir
+D:/Projects/kashmeer_milk/android/app/.cxx/Debug/3o2p4b1z/x86/CMakeFiles/rebuild_cache.dir

@@ -369,7 +369,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             width: 175,
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [Color(0xff78c1f3), Color(0xff78a2f3)],
+                                colors: [
+                                  Color(0xff78c1f3),
+                                  Color(0xff78a2f3),
+                                ],
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                               ),
@@ -475,7 +478,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ],
                       isCurved: true,
                       color: Colors.white.withOpacity(0.8),
-                      barWidth: 2,
+                      barWidth: 1,
                       dotData: FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
@@ -550,6 +553,7 @@ class CustomerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      color: Color(0xffffffff),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 3,
       child: Padding(
@@ -606,6 +610,7 @@ class CustomerItem extends StatelessWidget {
               ),
             ),
             PopupMenuButton<int>(
+              color: Color(0xffffffff),
               onSelected: (value) {
                 SendMessage().sendMessage(customer, context);
               },
@@ -615,7 +620,6 @@ class CustomerItem extends StatelessWidget {
                   child: Text('Send Message'),
                 ),
               ],
-              child: const Icon(Icons.more_horiz),
             ),
           ],
         ),

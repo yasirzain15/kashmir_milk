@@ -153,6 +153,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       itemCount: users.length,
                       itemBuilder: (context, index) {
                         return Card(
+                          color: Color(0xffffffff),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
                           ),
