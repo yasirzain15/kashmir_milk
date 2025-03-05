@@ -167,7 +167,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                             ),
                             subtitle: Text(
                               "Milk Quantity: ${users[index]["milk"]} L",
-                              style: TextStyle(color: Colors.grey[700]),
+                              style: TextStyle(color: Color(0xff78c1f3)),
                             ),
                             trailing: Text(
                               users[index]["phone"]!,

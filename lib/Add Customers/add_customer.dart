@@ -53,7 +53,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     // Check if the device is connected to WiFi or Mobile Data
     if (connectivityResult == ConnectivityResult.none) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No Internet Connection")),
+        const SnackBar(
+          content: Text("No Internet Connection"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
       );
       return false;
     }
@@ -71,13 +74,19 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         return true; // Internet is working
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No Internet: Failed to reach server")),
+          const SnackBar(
+            content: Text("No Internet: Failed to reach server"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
         );
         return false;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No Internet: Unable to connect")),
+        const SnackBar(
+          content: Text("No Internet: Unable to connect"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
       );
       return false;
     }
@@ -94,7 +103,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   Future<void> _saveCustomerData() async {
     if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Name and Phone Number are required!")),
+        const SnackBar(
+          content: Text("Name and Phone Number are required!"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
       );
 
       return;
@@ -135,7 +147,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Customer Added Successfully!")),
+          const SnackBar(
+            content: Text("Customer Added Successfully!"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
         );
 
         // Clear the fields after saving
@@ -154,7 +169,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       await box.add(customer);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No Internet! Saved Offline.")),
+        const SnackBar(
+          content: Text("No Internet! Saved Offline."),
+          backgroundColor: Color(0xff78c1f3),
+        ),
       );
       _nameController.clear();
       _cityController.clear();
@@ -301,8 +319,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                             _phoneController.text.trim().isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text(
-                                    "Name and Phone Number are required!")),
+                              content:
+                                  Text("Name and Phone Number are required!"),
+                              backgroundColor: Color(0xffc30010),
+                            ),
                           );
                           return; // Stop execution if validation fails
                         }

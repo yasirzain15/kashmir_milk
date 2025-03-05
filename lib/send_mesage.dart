@@ -12,7 +12,10 @@ class SendMessage {
       // Validate phone number
       if (phoneNumber.isEmpty || phoneNumber.length < 10) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Invalid phone number for $customerName")),
+          SnackBar(
+            content: Text("Invalid phone number for $customerName"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
         );
         return;
       }
@@ -39,7 +42,9 @@ class SendMessage {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
-                  "Bill calculation error for $customerName. Please check the data.")),
+                "Bill calculation error for $customerName. Please check the data.",
+              ),
+              backgroundColor: Color(0xff78c1f3)),
         );
         return;
       }
