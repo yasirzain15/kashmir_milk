@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages, avoid_print, use_build_context_synchronously, library_private_types_in_public_api, unused_element
+// ignore_for_file: depend_on_referenced_packages, avoid_print, use_build_context_synchronously
 
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -8,9 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hive/hive.dart';
-import 'package:http/http.dart' as http;
-import 'package:kashmeer_milk/Models/customer_model.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class CsvExcelUploader extends StatefulWidget {
   const CsvExcelUploader({super.key});
@@ -20,10 +18,20 @@ class CsvExcelUploader extends StatefulWidget {
 }
 
 class _CsvExcelUploaderState extends State<CsvExcelUploader> {
-  List<Map<String, dynamic>?> fileData = [];
+  List<Map<String, dynamic>> fileData = []; // Ensure this holds valid data
   String? fileName;
   bool isUploading = false;
   int uploadProgress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _openHiveBox();
+  }
+
+  Future<void> _openHiveBox() async {
+    await Hive.openBox<Map>('CSV_customers'); // Ensure box is open
+  }
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -35,7 +43,9 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     if (result == null || result.files.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("No file selected ❌"), backgroundColor: Colors.red),
+          content: Text("No file selected ❌"),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -45,30 +55,17 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       String csvString = utf8.decode(pickedFile.bytes!);
       fileName = pickedFile.name;
 
-      print("CSV content: $csvString");
-
       List<List<dynamic>> csvTable =
           const CsvToListConverter(eol: '\n').convert(csvString);
 
       if (csvTable.isEmpty) throw Exception("CSV file is empty");
 
-      print("CSV Table: $csvTable");
-
       List<String> headers =
           csvTable.first.map((e) => e.toString().trim()).toList();
-      List<Map<String, dynamic>?> dataList = csvTable
+      List<Map<String, dynamic>> dataList = csvTable
           .skip(1)
-          .map((row) {
-            if (row.length != headers.length) {
-              print("Skipping row due to incorrect column count: $row");
-              return null;
-            }
-            return Map<String, dynamic>.fromIterables(headers, row);
-          })
-          .where((element) => element != null)
+          .map((row) => Map<String, dynamic>.fromIterables(headers, row))
           .toList();
-
-      print("Parsed data: $dataList");
 
       setState(() {
         fileData = dataList;
@@ -83,62 +80,19 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text("Error reading CSV ❌ $e"),
-            backgroundColor: Colors.red),
+          content: Text("Error reading CSV ❌ $e"),
+          backgroundColor: Color(0xffff2c2c),
+        ),
       );
     }
   }
 
-  Future<bool> _checkInternetConnection() async {
+  Future<bool> checkInternet() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-
-    // Check if the device is connected to WiFi or Mobile Data
-    if (connectivityResult == ConnectivityResult.none) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No Internet Connection"),
-          backgroundColor: Color(0xffc30010),
-        ),
-      );
-      return false;
-    }
-
-    // Try pinging Google to check actual internet access
-    try {
-      final response = await http
-          .get(Uri.parse('https://www.google.com'))
-          .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                "Internet Connected via ${connectivityResult == ConnectivityResult.wifi ? "WiFi" : "Mobile Data"}"),
-            backgroundColor: Color(0xff78c1f3),
-          ),
-        );
-        return true; // Internet is working
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("No Internet: Failed to reach server"),
-            backgroundColor: Color(0xffc30010),
-          ),
-        );
-        return false;
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("No Internet: Unable to connect"),
-          backgroundColor: Color(0xffc30010),
-        ),
-      );
-      return false;
-    }
+    return connectivityResult != ConnectivityResult.none;
   }
 
-  Future<void> exportToFirebase() async {
+  Future<void> exportToStorage() async {
     if (fileData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -155,183 +109,114 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     });
 
     try {
+      bool hasInternet = await checkInternet();
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+      CollectionReference userCollection = firestore
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('customer');
+
       int totalRows = fileData.length;
       int processedRows = 0;
-      final isConnected = await _checkInternetConnection();
 
-      if (isConnected) {
-        FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-        CollectionReference userCollection = firestore
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection('customer');
-
+      if (hasInternet) {
         for (var row in fileData) {
-          // Upload each row as a separate document
           await userCollection.add(row);
           processedRows++;
+          setState(() =>
+              uploadProgress = ((processedRows / totalRows) * 100).round());
         }
 
-        // Update progress
-        setState(() {
-          uploadProgress = ((processedRows / totalRows) * 100).round();
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Successfully exported to Firebase ✅"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
+        );
       } else {
-        var box = Hive.box<Customer>('CSV customers');
+        var box = Hive.box<Map>('CSV_customers'); // Use proper type
 
         for (var row in fileData) {
-          await box.add(Customer.fromJson(row!));
-
-          // Upload each row as a separate document
+          await box.add(row); // Directly store the map
 
           processedRows++;
-        }
-        // Update progress
-        setState(() {
-          uploadProgress = ((processedRows / totalRows) * 100).round();
-        });
-      }
+          print("Row saved: $row");
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Successfully exported to Local Storage"),
-          backgroundColor: Color(0xff78c1f3),
-        ),
-      );
+          if (processedRows % 5 == 0) {
+            setState(() =>
+                uploadProgress = ((processedRows / totalRows) * 100).round());
+          }
+        }
+
+        print("Stored Data: ${box.values.toList()}"); // Debugging
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Saved to Local Storage ❌ No Internet"),
+            backgroundColor: Colors.yellow,
+          ),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error exporting to Local Storage ❌ $e"),
+          content: Text("Error during upload ❌ $e"),
           backgroundColor: Colors.red,
         ),
       );
     } finally {
-      setState(() {
-        isUploading = false;
-      });
+      setState(() => isUploading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        backgroundColor: Color(0xff78c1f3),
-        title: Text(
-          "Multiple Entries",
-          style: GoogleFonts.poppins(
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
-            ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Upload CSV"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: pickFile,
+                child: buildButton(Icons.upload_file, "Upload File"),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
+                onTap: exportToStorage,
+                child: buildButton(Icons.cloud_upload,
+                    isUploading ? "Uploading..." : "Export File"),
+              ),
+              if (fileName != null) Text("Selected File: $fileName"),
+              if (isUploading)
+                LinearProgressIndicator(value: uploadProgress / 100),
+              if (isUploading) Text("Upload Progress: $uploadProgress%"),
+            ],
           ),
         ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: pickFile,
-                  child: Container(
-                    height: 44.53,
-                    width: 175,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                      colors: [
-                        Color(0xff78c1f3),
-                        Color(0xff78a2f3),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    )),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 13),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.upload_file,
-                            color: Color(0xffffffff),
-                          ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                          Text(
-                            'Upload File',
-                            style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 16,
-                                color: Color(0xffffffff),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  height: 44.53,
-                  width: 175,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xff78c1f3),
-                        Color(0xff78a2f3),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 13),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.cloud_upload,
-                          color: Color(0xffffffff),
-                        ),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          isUploading ? "Exporting..." : "Export File",
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Color(0xffffffff),
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (fileName != null) ...[
-                  Text("Selected File: $fileName"),
-                  if (isUploading)
-                    Column(
-                      children: [
-                        const SizedBox(height: 10),
-                        LinearProgressIndicator(value: uploadProgress / 100),
-                        Text("Upload Progress: $uploadProgress%"),
-                      ],
-                    ),
-                ],
-              ],
-            ),
-          ),
-        ),
+    );
+  }
+
+  Widget buildButton(IconData icon, String text) {
+    return Container(
+      height: 45,
+      width: 175,
+      decoration: BoxDecoration(
+        gradient:
+            LinearGradient(colors: [Color(0xff78c1f3), Color(0xff78a2f3)]),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white),
+          const SizedBox(width: 8),
+          Text(text,
+              style: GoogleFonts.poppins(color: Colors.white, fontSize: 16)),
+        ],
       ),
     );
   }

@@ -14,6 +14,7 @@ class SendMessage {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Invalid phone number for $customerName"),
+            duration: Duration(seconds: 1),
             backgroundColor: Color(0xff78c1f3),
           ),
         );
@@ -24,7 +25,9 @@ class SendMessage {
       if (!RegExp(r'^[0-9]+$').hasMatch(phoneNumber)) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text("Invalid phone number format for $customerName")),
+            content: Text("Invalid phone number format for $customerName"),
+            duration: Duration(seconds: 1),
+          ),
         );
         return;
       }
@@ -44,6 +47,7 @@ class SendMessage {
               content: Text(
                 "Bill calculation error for $customerName. Please check the data.",
               ),
+              duration: Duration(seconds: 1),
               backgroundColor: Color(0xff78c1f3)),
         );
         return;
@@ -54,7 +58,7 @@ class SendMessage {
       String message =
           "Hello $customerName, your total milk bill is Rs. ${totalBill.toStringAsFixed(2)} "
           "(Price: Rs. ${pricePerLiter.toStringAsFixed(2)}/L x ${quantityLiters.toStringAsFixed(2)}L). "
-          "Please make the payment soon. Thank you!";
+          "Please make the payment soon. Thank you!  EasyPaisa Number : 03143130462";
 
       Uri smsUri =
           Uri.parse("sms:$phoneNumber?body=${Uri.encodeComponent(message)}");
@@ -66,7 +70,8 @@ class SendMessage {
       //   ScaffoldMessenger.of(context).showSnackBar(
       //     const SnackBar(
       //         content: Text(
-      //             "Could not open messaging app. Ensure an SMS app is installed.")),
+      //             "Could not open messaging app. Ensure an SMS app is installed."),
+      // duration: Duration(seconds: 1),),
       //   );
       // }
     } catch (e) {

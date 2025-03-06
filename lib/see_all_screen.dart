@@ -51,32 +51,34 @@ class _SeeallScreenState extends State<SeeallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: const Color(0xff78c1f3),
-        title: Text(
-          'All Customers',
-          style: GoogleFonts.poppins(
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-              color: Colors.white,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: const Color(0xff78c1f3),
+          title: Text(
+            'All Customers',
+            style: GoogleFonts.poppins(
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: customers.isEmpty
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  itemCount: customers.length,
-                  itemBuilder: (context, index) {
-                    return buildCustomerItem(customers[index]);
-                  },
-                ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: customers.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: customers.length,
+                    itemBuilder: (context, index) {
+                      return buildCustomerItem(customers[index]);
+                    },
+                  ),
+          ),
         ),
       ),
     );

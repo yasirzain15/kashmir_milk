@@ -39,7 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
+        SnackBar(
+          content: Text(message),
+          duration: Duration(seconds: 1),
+        ),
       );
     }
   }
@@ -185,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: 300,
                     decoration: BoxDecoration(
                       color: isLoading ? Colors.grey : const Color(0xff78c1f3),
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(0),
                     ),
                     child: Center(
                       child: isLoading

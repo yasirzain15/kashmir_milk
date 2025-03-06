@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, deprecated_member_use, use_build_context_synchronously, use_key_in_widget_constructors, library_private_types_in_public_api
+// ignore_for_file: avoid_print, deprecated_member_use, use_build_context_synchronously
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +17,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
   List<Map<String, String>> users = [];
   bool isLoading = false;
   double progress = 0.0;
-
-  final double milkPricePerLiter = 220.0; // Milk price per liter
+  final double milkPricePerLiter = 220.0;
 
   @override
   void initState() {
@@ -73,20 +72,26 @@ class _NotifyScreenState extends State<NotifyScreen> {
     setState(() => progress = 0.0);
 
     for (int i = 0; i < users.length; i++) {
-      await Future.delayed(Duration(seconds: 1));
       double milkQuantity = double.tryParse(users[i]["milk"]!) ?? 0.0;
       double totalBill = milkQuantity * milkPricePerLiter;
       String message =
-          "Hello ${users[i]["name"]}, your total bill for ${users[i]["milk"]} liters of milk is PKR ${totalBill.toStringAsFixed(2)}.";
+          "Hello ${users[i]["name"]}, your total bill for ${users[i]["milk"]} liters of milk is PKR ${totalBill.toStringAsFixed(2)}.Please make the payment soon. Thank you!  EasyPaisa Number : 03143130462";
 
-      sendSms(users[i]["phone"]!, message);
+      await sendSms(users[i]["phone"]!, message);
+
       setState(() {
         progress = (i + 1) / users.length;
       });
+      await Future.delayed(Duration(milliseconds: 500));
     }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text("Bills sent to all customers!")));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Bills sent to all customers!"),
+        duration: Duration(seconds: 1),
+        backgroundColor: Color(0xff78c1f3),
+      ),
+    );
     setState(() {
       progress = 0.0;
     });
@@ -98,16 +103,15 @@ class _NotifyScreenState extends State<NotifyScreen> {
       return;
     }
 
-    // Normalize the phone number
-    String normalizedPhone = phone.replaceAll(
-        RegExp(r'[^0-9+]'), ''); // Remove dashes/spaces but keep '+'
+    // Normalize phone number
+    String normalizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
 
-    // If the number starts with '03', add '+92' (Pakistan country code)
+    // Convert '03xxxxxxxxx' to '+92xxxxxxxxxx'
     if (RegExp(r'^03[0-9]{9}$').hasMatch(normalizedPhone)) {
       normalizedPhone = "+92${normalizedPhone.substring(1)}";
     }
 
-    // Validate phone number
+    // Validate phone number format
     if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(normalizedPhone)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Invalid phone number format: $phone")),
@@ -118,10 +122,22 @@ class _NotifyScreenState extends State<NotifyScreen> {
     final Uri smsUri =
         Uri.parse("sms:$normalizedPhone?body=${Uri.encodeComponent(message)}");
 
-    if (await canLaunchUrl(smsUri)) {
-      await launchUrl(smsUri);
-    } else {
-      print("Could not launch SMS to $normalizedPhone");
+    try {
+      bool launched = await launch(smsUri.toString());
+
+      if (!launched) {
+        throw 'Could not launch SMS';
+      }
+    } catch (e) {
+      print("Error launching SMS: $e");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "Unable to send SMS. Please check your default messaging app."),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -129,12 +145,11 @@ class _NotifyScreenState extends State<NotifyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: true,
         backgroundColor: Color(0xff78c1f3),
         title: Text(
           "Notify Customers",
           style: GoogleFonts.poppins(
-            textStyle: const TextStyle(
+            textStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w400,
               color: Colors.white,
@@ -153,28 +168,20 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       itemCount: users.length,
                       itemBuilder: (context, index) {
                         return Card(
-                          color: Color(0xffffffff),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          elevation: 4,
-                          margin: EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
-                            contentPadding: EdgeInsets.all(16.0),
                             title: Text(
                               users[index]["name"]!,
                               style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 18),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
-                            subtitle: Text(
-                              "Milk Quantity: ${users[index]["milk"]} L",
-                              style: TextStyle(color: Color(0xff78c1f3)),
-                            ),
+                            subtitle: Text("Milk: ${users[index]["milk"]} L"),
                             trailing: Text(
                               users[index]["phone"]!,
                               style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500),
+                                color: Color(0xff78c1f3),
+                              ),
                             ),
                           ),
                         );
@@ -184,52 +191,42 @@ class _NotifyScreenState extends State<NotifyScreen> {
             LinearProgressIndicator(value: progress),
             SizedBox(height: 10),
             GestureDetector(
-              onTap: () {
-                sendBillsToAll();
-              },
+              onTap: sendBillsToAll,
               child: Container(
                 height: 44.53,
+                width: 175,
                 decoration: BoxDecoration(
-                  color: Color(0xffffffff),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color(0xff000000).withOpacity(0.25),
-                      blurRadius: 9,
-                      spreadRadius: 0,
-                      offset: Offset(0, 1),
-                    ),
-                  ],
-                ),
-                child: Container(
-                  height: 44.53,
-                  width: 175,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xff78c1f3),
-                        Color(0xff78a2f3),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xff78c1f3),
+                      Color(0xff78a2f3),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Send Bills to All',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 16,
-                              color: Color(0xffffffff),
-                            ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 13),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Send Bills to All',
+                        style: GoogleFonts.poppins(
+                          textStyle: TextStyle(
+                            fontWeight: FontWeight.w400,
+                            fontSize: 16,
+                            color: Color(0xffffffff),
                           ),
-                        )
-                      ],
-                    ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 11,
+                      ),
+                      Icon(
+                        Icons.send,
+                        color: Color(0xffffffff),
+                      ),
+                    ],
                   ),
                 ),
               ),

@@ -55,6 +55,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No Internet Connection"),
+          duration: Duration(seconds: 1),
           backgroundColor: Color(0xff78c1f3),
         ),
       );
@@ -76,6 +77,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("No Internet: Failed to reach server"),
+            duration: Duration(seconds: 1),
             backgroundColor: Color(0xff78c1f3),
           ),
         );
@@ -85,6 +87,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No Internet: Saved Offline !!"),
+          duration: Duration(seconds: 2),
           backgroundColor: Color(0xffc30010),
         ),
       );
@@ -105,11 +108,14 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Name and Phone Number are required!"),
+          duration: Duration(seconds: 1),
           backgroundColor: Color(0xff78c1f3),
         ),
       );
 
-      return;
+      setState(() {
+        isLoading = false;
+      });
     }
 
     final customer = Customer(
@@ -188,176 +194,178 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: true,
-            backgroundColor: Color(0xff78c1f3),
-            title: Text(
-              "Customer Registration",
-              style: GoogleFonts.poppins(
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white,
+        SafeArea(
+          child: Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: true,
+              backgroundColor: Color(0xff78c1f3),
+              title: Text(
+                "Customer Registration",
+                style: GoogleFonts.poppins(
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
-          ),
-          backgroundColor: Color(0xffffffff),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  // Profile Image Section (Ignored for now)
+            backgroundColor: Color(0xffffffff),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    // Profile Image Section (Ignored for now)
 
-                  const SizedBox(height: 90),
+                    const SizedBox(height: 90),
 
-                  // Form Fields
-                  _buildTextField(
-                      controller: _nameController,
-                      icon: Icons.person_outline,
-                      hint: "Full Name"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _cityController,
-                      icon: Icons.location_city,
-                      hint: "City"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _sectorController,
-                      icon: Icons.business,
-                      hint: "Sector"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _streetController,
-                      icon: Icons.streetview,
-                      hint: "Street No"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _houseController,
-                      icon: Icons.home_outlined,
-                      hint: "House No"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _phoneController,
-                      icon: Icons.phone,
-                      hint: "Phone Number"),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  _buildTextField(
-                      controller: _milkQuantityController,
-                      icon: Icons.water_drop_outlined,
-                      hint: "Milk Quantity",
-                      isNumber: true),
-
-                  // Price Information (Dynamic Estimated Price)
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Price/L: 220 PKR",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xffafafbd),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
-                        style: GoogleFonts.montserrat(
-                          textStyle: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xffafafbd),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Add Customer Button
-                  const SizedBox(height: 20),
-                  Container(
-                    width: double.infinity,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Color(0xff78c1f3),
-                          Color(0xff78a2f3),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      // borderRadius: BorderRadius.circular(8),
+                    // Form Fields
+                    _buildTextField(
+                        controller: _nameController,
+                        icon: Icons.person_outline,
+                        hint: "Full Name"),
+                    SizedBox(
+                      height: 15,
                     ),
-                    child: TextButton(
-                      onPressed: () async {
-                        FocusScope.of(context).unfocus();
+                    _buildTextField(
+                        controller: _cityController,
+                        icon: Icons.location_city,
+                        hint: "City"),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildTextField(
+                        controller: _sectorController,
+                        icon: Icons.business,
+                        hint: "Sector"),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildTextField(
+                        controller: _streetController,
+                        icon: Icons.streetview,
+                        hint: "Street No"),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildTextField(
+                        controller: _houseController,
+                        icon: Icons.home_outlined,
+                        hint: "House No"),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildTextField(
+                        controller: _phoneController,
+                        icon: Icons.phone,
+                        hint: "Phone Number"),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    _buildTextField(
+                        controller: _milkQuantityController,
+                        icon: Icons.water_drop_outlined,
+                        hint: "Milk Quantity",
+                        isNumber: true),
 
-                        setState(() {
-                          isLoading = true;
-                        });
+                    // Price Information (Dynamic Estimated Price)
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Price/L: 220 PKR",
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffafafbd),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
+                          style: GoogleFonts.montserrat(
+                            textStyle: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xffafafbd),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-                        // Validation: Check if required fields are empty
-                        if (_nameController.text.trim().isEmpty ||
-                            _phoneController.text.trim().isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text("Name and Phone Number are required!"),
-                              backgroundColor: Color(0xffc30010),
+                    // Add Customer Button
+                    const SizedBox(height: 20),
+                    Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xff78c1f3),
+                            Color(0xff78a2f3),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        // borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: TextButton(
+                        onPressed: () async {
+                          FocusScope.of(context).unfocus();
+
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          // Validation: Check if required fields are empty
+                          if (_nameController.text.trim().isEmpty ||
+                              _phoneController.text.trim().isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text("Name and Phone Number are required!"),
+                                backgroundColor: Color(0xffc30010),
+                              ),
+                            );
+                            return; // Stop execution if validation fails
+                          }
+
+                          await _saveCustomerData(); // Save customer data
+
+                          final provider =
+                              Provider.of<Funs>(context, listen: false);
+
+                          if (isConnected!) {
+                            await provider
+                                .getall(); // Fetch from Firebase if online
+                          } else {
+                            await provider
+                                .getFromHive(); // Fetch from Hive if offline
+                          }
+
+                          // Navigate only after successful validation and saving
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DashboardScreen(),
                             ),
                           );
-                          return; // Stop execution if validation fails
-                        }
-
-                        await _saveCustomerData(); // Save customer data
-
-                        final provider =
-                            Provider.of<Funs>(context, listen: false);
-
-                        if (isConnected!) {
-                          await provider
-                              .getall(); // Fetch from Firebase if online
-                        } else {
-                          await provider
-                              .getFromHive(); // Fetch from Hive if offline
-                        }
-
-                        // Navigate only after successful validation and saving
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DashboardScreen(),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        "Add Customer",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500),
+                        },
+                        child: const Text(
+                          "Add Customer",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

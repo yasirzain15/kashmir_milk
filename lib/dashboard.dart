@@ -88,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Press back again to exit"),
-          backgroundColor: Color(0xff78c1f3),
+          backgroundColor: Color(0xffff2c2c),
           duration: Duration(seconds: 2),
         ),
       );
@@ -121,7 +121,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await FirebaseAuth.instance.signOut();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Logged out successfully!")),
+        const SnackBar(
+          content: Text("Logged out successfully!"),
+          duration: Duration(seconds: 1),
+        ),
       );
 
       // Navigate to Login Screen (Replace with your actual login screen)
@@ -129,7 +132,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           context, MaterialPageRoute(builder: (context) => LoginScreen()));
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: ${e.toString()}")),
+        SnackBar(
+          content: Text("Error: ${e.toString()}"),
+          duration: Duration(seconds: 1),
+        ),
       );
     }
   }
@@ -420,7 +426,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Container(
         height: 154,
         width: 350,
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           image: DecorationImage(
               image: AssetImage('assets/bg.png'), fit: BoxFit.cover),
