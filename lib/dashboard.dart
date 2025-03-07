@@ -1,21 +1,19 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kashmeer_milk/Add customers/add_customer.dart'; // Ensure this file exists
-import 'package:kashmeer_milk/Add Customers/multiple_entries.dart'; // Ensure this file exists
+import 'package:kashmeer_milk/Add customers/add_customer.dart';
+import 'package:kashmeer_milk/Add Customers/multiple_entries.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/message_screen.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
-import 'package:provider/provider.dart'; // Ensure this file exists
-// Ensure this file exists
-// Ensure this file exists
+import 'package:provider/provider.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -29,6 +27,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int totalCustomers = 0;
   List<String> uniqueSectors = [];
   DateTime? lastBackPress;
+  int _currentIndex = 0;
+  final TextEditingController _customerController = TextEditingController();
+  final List<String> _imageList = [
+    'assets/image.png',
+    'assets/image.png',
+    'assets/image.png',
+    'assets/image.png', // Add your images in assets folder
+  ];
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -43,6 +50,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       fetchUniqueSectors();
     });
     updateGreeting();
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   Future<void> fetchUniqueSectors() async {
@@ -83,10 +96,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<bool> onWillPop() async {
     DateTime now = DateTime.now();
     if (lastBackPress == null ||
-        now.difference(lastBackPress!) > Duration(seconds: 2)) {
+        now.difference(lastBackPress!) > const Duration(seconds: 2)) {
       lastBackPress = now;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Press back again to exit"),
           backgroundColor: Color(0xffff2c2c),
           duration: Duration(seconds: 2),
@@ -127,14 +140,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       );
 
-      // Navigate to Login Screen (Replace with your actual login screen)
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      // Navigate to Login Screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: ${e.toString()}"),
-          duration: Duration(seconds: 1),
+          duration: const Duration(seconds: 1),
         ),
       );
     }
@@ -145,421 +160,429 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
-          backgroundColor: Colors.white,
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Top Bar
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Icon(
+                      Icons.segment_outlined,
+                      color: Color(0xff000000),
+                    ),
+                    Text(
+                      "$greeting, ${FirebaseAuth.instance.currentUser!.displayName}",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: Color(0xff78c1f3),
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.bolt_outlined,
+                        color: Color(0xff1976d2),
+                      ),
+                      onPressed: _logoutUser,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Carousel Slider
+                CarouselSlider(
+                  items: _imageList.map((imagePath) {
+                    return Stack(
                       children: [
-                        Text(
-                          "$greeting ,${FirebaseAuth.instance.currentUser!.displayName}",
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
-                              color: Color(0xff78c1f3),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            imagePath,
+                            fit: BoxFit.cover,
+                            width: 1000,
+                          ),
+                        ),
+                        Positioned(
+                          right: 20, // Adjust position
+                          bottom: 40, // Adjust position
+                          child: Text(
+                            "We have\nso fresh milk",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  blurRadius: 5.0,
+                                  color: Colors.black.withOpacity(0.5),
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.power_settings_new,
-                            size: 35,
-                            color: Color(0xffff2c2c),
-                          ),
-                          onPressed: () async {
-                            await _logoutUser();
-                            // You can add functionality to open a menu
-                          },
-                        ),
-                      ]),
-                  const SizedBox(height: 20),
-
-                  // Stats Cards
-                  _buildStatsCard("Our Customers", "$totalCustomers"),
-                  SizedBox(
-                    height: 16,
+                      ],
+                    );
+                  }).toList(),
+                  options: CarouselOptions(
+                    height: 200,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.9,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
                   ),
-                  _buildStatsCard("Our Areas", uniqueSectors.join(", ")),
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _imageList.asMap().entries.map((entry) {
+                    return GestureDetector(
+                      onTap: () => setState(() {
+                        _currentIndex = entry.key;
+                      }),
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _currentIndex == entry.key
+                              ? Colors.grey.shade400
+                              : Colors.blue,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Text(
+                      'My Customers',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 17),
+                  child: SingleChildScrollView(
+                    child: TextFormField(
+                      controller: _customerController,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Search Customers',
+                        filled: true, // Enable background fill
+                        fillColor: Colors.grey.shade100, // Set background color
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
 
-                  const SizedBox(height: 24),
-
-                  // Recent Customers Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Recent Customers",
+                // Recent Customers Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Recent Customers",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Color(0xff1976d2),
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SeeallScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        "See all",
                         style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
+                          textStyle: const TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 16,
                             color: Color(0xff1976d2),
                           ),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SeeallScreen()));
-                        },
-                        child: Text(
-                          "See all",
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 16,
-                              color: Color(0xff1976d2),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
 
-                  // Customer List
-                  Expanded(
-                    child: Consumer<Funs>(
-                      builder: (context, provider, child) => ListView.separated(
-                        itemCount: provider
-                            .customers.length, // Dynamically get customer data
-                        itemBuilder: (context, index) {
-                          return CustomerItem(
-                            customer: provider.customers[index],
-                          );
-                        },
-                        separatorBuilder: (context, index) => Divider(),
-                      ),
+                // Customer List
+                Expanded(
+                  child: Consumer<Funs>(
+                    builder: (context, provider, child) => ListView.separated(
+                      itemCount: provider.customers.length,
+                      itemBuilder: (context, index) {
+                        return CustomerItem(
+                          customer: provider.customers[index],
+                        );
+                      },
+                      separatorBuilder: (context, index) => const Divider(),
                     ),
                   ),
+                ),
 
-                  // Bottom Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PopupMenuButton(
-                          color: Color(0xffffffff),
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 1,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          CustomerRegistrationForm(),
-                                    ),
-                                  );
-                                },
-                                child: ListTile(
-                                  title: Text(
-                                    'Single Entry',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                        color: Color(0xff292929),
-                                      ),
+                // Bottom Buttons
+                Row(
+                  children: [
+                    Expanded(
+                      child: PopupMenuButton(
+                        color: const Color(0xffffffff),
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 1,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CustomerRegistrationForm(),
+                                  ),
+                                );
+                              },
+                              child: ListTile(
+                                title: Text(
+                                  'Single Entry',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: Color(0xff292929),
                                     ),
                                   ),
-                                  subtitle: Text(
-                                    'Add Only One Customer',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 10,
-                                        color: Color(0xffafafbd),
-                                      ),
+                                ),
+                                subtitle: Text(
+                                  'Add Only One Customer',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 10,
+                                      color: Color(0xffafafbd),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            PopupMenuItem(
-                              value: 1,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => CsvExcelUploader(),
-                                    ),
-                                  );
-                                },
-                                child: ListTile(
-                                  title: Text(
-                                    'Multiple Entries',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12,
-                                        color: Color(0xff292929),
-                                      ),
+                          ),
+                          PopupMenuItem(
+                            value: 2,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CsvExcelUploader(),
+                                  ),
+                                );
+                              },
+                              child: ListTile(
+                                title: Text(
+                                  'Multiple Entries',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                      color: Color(0xff292929),
                                     ),
                                   ),
-                                  subtitle: Text(
-                                    'Add Multiple Customers',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 10,
-                                        color: Color(0xffafafbd),
-                                      ),
+                                ),
+                                subtitle: Text(
+                                  'Add Multiple Customers',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 10,
+                                      color: Color(0xffafafbd),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ],
-                          child: Container(
-                            height: 44.53,
-                            width: 175,
-                            decoration: BoxDecoration(
-                                gradient: LinearGradient(
+                          ),
+                        ],
+                        child: Container(
+                          height: 44.53,
+                          width: 175,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
                               colors: [
                                 Color(0xff78c1f3),
-                                Color(
-                                  0xff78a2f3,
-                                ),
+                                Color(0xff78a2f3),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                            )),
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 13),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.add,
-                                    color: Color(0xffffffff),
-                                  ),
-                                  SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    'Add New',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16,
-                                        color: Color(0xffffffff),
-                                      ),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 13),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.add,
+                                  color: Color(0xffffffff),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Add New',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16,
+                                      color: Color(0xffffffff),
                                     ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => NotifyScreen()));
-                          },
-                          child: Container(
-                            height: 44.53,
-                            width: 175,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color(0xff78c1f3),
-                                  Color(0xff78a2f3),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotifyScreen(),
                             ),
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 13),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.notification_add_outlined,
-                                    color: Color(0xffffffff),
-                                  ),
-                                  SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    'Notify',
-                                    style: GoogleFonts.poppins(
-                                      textStyle: TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 16,
-                                        color: Color(0xffffffff),
-                                      ),
+                          );
+                        },
+                        child: Container(
+                          height: 44.53,
+                          width: 175,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xff78c1f3),
+                                Color(0xff78a2f3),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 13),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.notification_add_outlined,
+                                  color: Color(0xffffffff),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Notify',
+                                  style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      fontSize: 16,
+                                      color: Color(0xffffffff),
                                     ),
-                                  )
-                                ],
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          )),
-    );
-  }
-
-  Widget _buildStatsCard(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 32, right: 31),
-      child: Container(
-        height: 154,
-        width: 350,
-        padding: const EdgeInsets.all(7),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage('assets/bg.png'), fit: BoxFit.cover),
-          gradient: LinearGradient(
-            colors: [
-              Color(0xff78c1f3),
-              Color(0xff78a2f3),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: GoogleFonts.josefinSans(
-                textStyle: TextStyle(
-                  fontWeight: FontWeight.w400,
-                  fontSize: 10,
-                  color: Color(0xffffffff),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: GoogleFonts.josefinSans(
-                textStyle: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                  color: Color(0xffffffff),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              height: 50,
-              child: LineChart(
-                LineChartData(
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: [
-                        const FlSpot(0, 3),
-                        const FlSpot(2, 2),
-                        const FlSpot(4, 5),
-                        const FlSpot(6, 3.1),
-                        const FlSpot(8, 4),
-                        const FlSpot(10, 3),
-                      ],
-                      isCurved: true,
-                      color: Colors.white.withOpacity(0.8),
-                      barWidth: 1,
-                      dotData: FlDotData(show: false),
-                      belowBarData: BarAreaData(
-                        show: true,
-                        color: Colors.white.withOpacity(0.2),
                       ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget buildCustomerItem(String name, String address) {
-    return Row(
-      children: [
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.white,
+          shape: CircularNotchedRectangle(),
+          notchMargin: 8.0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "1/2 Liter",
-                    style: TextStyle(
-                      color: Color(0xff78c1f3),
-                      fontSize: 12,
-                    ),
-                  ),
-                  Icon(Icons.more_horiz),
-                ],
+              IconButton(
+                icon: Icon(Icons.home, color: Colors.grey),
+                onPressed: () => _onItemTapped(0),
               ),
-              const SizedBox(height: 4),
-              Text(
-                name,
-                style: GoogleFonts.poppins(
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: Color(0xff12121f),
-                  ),
-                ),
+              IconButton(
+                icon: Icon(Icons.local_shipping, color: Colors.grey),
+                onPressed: () => _onItemTapped(1),
               ),
-              Text(
-                address,
-                style: GoogleFonts.poppins(
-                  textStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff000000),
-                  ),
-                ),
+              SizedBox(width: 48),
+              IconButton(
+                icon: Icon(Icons.attach_money, color: Colors.grey),
+                onPressed: () => _onItemTapped(2),
+              ),
+              IconButton(
+                icon: Icon(Icons.person, color: Colors.grey),
+                onPressed: () => _onItemTapped(3),
               ),
             ],
           ),
         ),
-      ],
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          shape: CircleBorder(),
+          backgroundColor: Colors.blueAccent,
+          child: PopupMenuButton(
+            icon: Icon(Icons.add, color: Colors.white),
+            onSelected: (value) {
+              // Handle selection
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(value: 1, child: Text('Single Entry')),
+              PopupMenuItem(value: 2, child: Text('Multiple Entries')),
+            ],
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      ),
     );
   }
 }
 
 class CustomerItem extends StatelessWidget {
-  Map<String, dynamic> customer;
+  final Map<String, dynamic> customer;
 
-  CustomerItem({super.key, required this.customer});
+  const CustomerItem({super.key, required this.customer});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Color(0xffffffff),
+      color: const Color(0xffffffff),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 3,
       child: Padding(
@@ -580,7 +603,6 @@ class CustomerItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
                   const SizedBox(height: 4),
                   Text(
                     "City: ${customer['City'] ?? "Unknown"}",
@@ -616,7 +638,7 @@ class CustomerItem extends StatelessWidget {
               ),
             ),
             PopupMenuButton<int>(
-              color: Color(0xffffffff),
+              color: const Color(0xffffffff),
               onSelected: (value) {
                 SendMessage().sendMessage(customer, context);
               },

@@ -32,6 +32,7 @@ dependencies:
   path_provider: ^2.1.5
   uuid: ^4.5.1
   fluttertoast: ^8.2.12
+  carousel_slider: ^5.0.0
   
   
   
@@ -52,3 +53,4 @@ flutter:
     - assets/ahmad.png
     - assets/mask.png
     - assets/bg.png
+    - assets/image.png
