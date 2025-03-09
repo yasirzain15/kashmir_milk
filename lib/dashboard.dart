@@ -188,9 +188,144 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(
-                      Icons.segment_outlined,
-                      color: Color(0xff000000),
+                    PopupMenuButton(
+                      color: Color(0xffffffff),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          value: 1,
+                          child: ListTile(
+                            title: Text(
+                              'Profile',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Color(0xff12121f),
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Profile Details',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 10,
+                                  color: Color(0xffafafbd),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 2,
+                          child: ListTile(
+                            title: Text(
+                              'Manage Payments',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Color(0xff12121f),
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Manage Payment records',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 10,
+                                  color: Color(0xffafafbd),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 1,
+                          child: ListTile(
+                            title: Text(
+                              'Quick Alerts',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Color(0xff12121f),
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Send Quick Alerts for',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 10,
+                                  color: Color(0xffafafbd),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 1,
+                          child: ListTile(
+                            title: Text(
+                              'Reports',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                  color: Color(0xff12121f),
+                                ),
+                              ),
+                            ),
+                            subtitle: Text(
+                              'Generate and Share reports',
+                              style: GoogleFonts.poppins(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 10,
+                                  color: Color(0xffafafbd),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              _logoutUser();
+                            },
+                            child: ListTile(
+                              title: Text(
+                                'Log Out',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xff12121f),
+                                  ),
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Logout',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    color: Color(0xffafafbd),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                      child: const Icon(
+                        Icons.segment_outlined,
+                        color: Color(0xff000000),
+                      ),
                     ),
                     Text(
                       "$greeting, ${FirebaseAuth.instance.currentUser!.displayName}",
