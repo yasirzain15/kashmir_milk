@@ -74,19 +74,6 @@ class _SeeallScreenState extends State<SeeallScreen> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: const Color(0xff78c1f3),
-          title: Text(
-            'All Customers',
-            style: GoogleFonts.poppins(
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w400,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
         body: SafeArea(
           child: Column(
             children: [
