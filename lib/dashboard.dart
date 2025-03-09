@@ -208,7 +208,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         height: 24,
                         width: 24,
                       ),
-                      onPressed: _logoutUser,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SeeallScreen(),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -270,7 +277,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         _currentIndex = entry.key;
                       }),
                       child: Container(
-                        width: 10,
+                        width: 10.34,
                         height: 10,
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
@@ -316,7 +323,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                         filled: true, // Enable background fill
-                        fillColor: Colors.grey.shade100, // Set background color
+                        fillColor: Color(0x2bc5e0f2), // Set background color
                       ),
                       onChanged: (value) {
                         setState(() {
@@ -331,31 +338,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
 
                 // Recent Customers Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SeeallScreen(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "See all",
-                        style: GoogleFonts.poppins(
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                            color: Color(0xff1976d2),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+
                 const SizedBox(height: 16),
 
                 // Customer List

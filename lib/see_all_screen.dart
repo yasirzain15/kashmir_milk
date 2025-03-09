@@ -16,6 +16,7 @@ class SeeallScreen extends StatefulWidget {
 
 class _SeeallScreenState extends State<SeeallScreen> {
   List<Map<String, dynamic>> customers = [];
+  String _searchQuery = ""; // Variable to store the search query
 
   // Fetch all customers from Firestore
   Future<void> getall() async {
@@ -32,6 +33,22 @@ class _SeeallScreenState extends State<SeeallScreen> {
     } catch (e) {
       debugPrint("Error fetching data: $e");
     }
+  }
+
+  // Function to filter customers based on the search query
+  List<Map<String, dynamic>> _filterCustomers(
+      List<Map<String, dynamic>> customers, String query) {
+    if (query.isEmpty) {
+      return customers; // Return all customers if the query is empty
+    }
+    return customers.where((customer) {
+      final name = customer['Full Name']?.toString().toLowerCase() ?? "";
+      final city = customer['City']?.toString().toLowerCase() ?? "";
+      final phone = customer['Phone No']?.toString().toLowerCase() ?? "";
+      return name.contains(query.toLowerCase()) ||
+          city.contains(query.toLowerCase()) ||
+          phone.contains(query.toLowerCase());
+    }).toList();
   }
 
   @override
@@ -51,6 +68,9 @@ class _SeeallScreenState extends State<SeeallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Filter customers based on the search query
+    final filteredCustomers = _filterCustomers(customers, _searchQuery);
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -68,23 +88,53 @@ class _SeeallScreenState extends State<SeeallScreen> {
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: customers.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: customers.length,
-                    itemBuilder: (context, index) {
-                      return buildCustomerItem(customers[index]);
-                    },
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'Search Customers',
+                    hintStyle: GoogleFonts.poppins(
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Color(0xffa6a6a6),
+                      ),
+                    ),
+                    filled: true, // Enable background fill
+                    fillColor: Color(0x2bc5e0f2), // Set background color
                   ),
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value; // Update the search query
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: filteredCustomers.isEmpty
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                          color: Color(0xff78c1f3),
+                        ))
+                      : ListView.builder(
+                          itemCount: filteredCustomers.length,
+                          itemBuilder: (context, index) {
+                            return buildCustomerItem(filteredCustomers[index]);
+                          },
+                        ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
-
-  // Function to send an SMS to the customer
 
   // Build UI for each customer item
   Widget buildCustomerItem(Map<String, dynamic> customer) {
@@ -101,7 +151,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
     String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
     return Card(
-      color: Color(0xffffffff),
+      color: const Color(0xffffffff),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 3,
       child: Padding(
@@ -168,7 +218,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                       width: 300,
                       height: 36.53,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [
                             Color(0xff78c1f3),
                             Color(0xff78a2f3),
@@ -181,7 +231,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                         child: Text(
                           'Send Monthly Report',
                           style: GoogleFonts.poppins(
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                             color: Color(0xffffffff),
@@ -194,7 +244,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
               ),
             ),
             PopupMenuButton<int>(
-              color: Color(0xffffffff),
+              color: const Color(0xffffffff),
               onSelected: (value) {
                 if (value == 1) {
                   SendMessage().sendMessage(customer, context);
