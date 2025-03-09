@@ -162,6 +162,34 @@ class _SeeallScreenState extends State<SeeallScreen> {
                       fontSize: 12,
                     ),
                   ),
+                  const SizedBox(height: 15),
+                  Center(
+                    child: Container(
+                      width: 300,
+                      height: 36.53,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xff78c1f3),
+                            Color(0xff78a2f3),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Send Monthly Report',
+                          style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xffffffff),
+                          )),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

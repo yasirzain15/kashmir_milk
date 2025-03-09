@@ -33,6 +33,7 @@ dependencies:
   uuid: ^4.5.1
   fluttertoast: ^8.2.12
   carousel_slider: ^5.0.0
+  flutter_svg: ^2.0.17
   
   
   
@@ -54,3 +55,8 @@ flutter:
     - assets/mask.png
     - assets/bg.png
     - assets/image.png
+    - assets/food.svg
+    - assets/home.svg
+    - assets/pay.svg
+    - assets/profile.svg
+    - assets/speed.svg
