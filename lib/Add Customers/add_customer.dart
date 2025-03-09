@@ -373,7 +373,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         isLoading
             ? Center(
                 child: CircularProgressIndicator(
-                    color: Colors.blue)) // Show Loader
+                    color: Color(0xff78c1f3))) // Show Loader
             : Container()
       ],
     );
