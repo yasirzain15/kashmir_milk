@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
+import 'package:kashmeer_milk/customerdetail_screen.dart';
 
 class SeeallScreen extends StatefulWidget {
   const SeeallScreen({super.key});
@@ -22,7 +23,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
   Future<void> getall() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference userCollection = firestore.collection('csv_data');
+      CollectionReference userCollection = firestore.collection('customer');
       final response = await userCollection.get();
 
       setState(() {
@@ -135,117 +136,131 @@ class _SeeallScreenState extends State<SeeallScreen> {
         .where((element) => element != null && element.toString().isNotEmpty)
         .join(", ");
     String phone = customer['Phone No']?.toString() ?? "N/A";
-    String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
+    // String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
-    return Card(
-      color: const Color(0xffffffff),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    address.isEmpty ? "No Address Provided" : address,
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "City: $city",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Phone: $phone",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "Price: Rs. $pricePerLiter /L",
-                    style: const TextStyle(
-                      color: Color(0xff78c1f3),
-                      fontSize: 12,
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  Center(
-                    child: Container(
-                      width: 300,
-                      height: 36.53,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xff78c1f3),
-                            Color(0xff78a2f3),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Send Monthly Report',
-                          style: GoogleFonts.poppins(
-                              textStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xffffffff),
-                          )),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    CustomerDetailScreen(customerId: customer['id'])));
+      },
+      child: Card(
+        color: const Color(0xffffffff),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Colors.black,
                         ),
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      address.isEmpty ? "No Address Provided" : address,
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "City: $city",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Phone: $phone",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "Milk Quantity: ${customer['Milk Quantity'] ?? "Unknown"}",
+                      style: const TextStyle(
+                        color: Color(0xff78c1f3),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          SendMessage().sendMessage(customer, context);
+                        },
+                        child: Container(
+                          width: 300,
+                          height: 36.53,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xff78c1f3),
+                                Color(0xff78a2f3),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Send Monthly Report',
+                              style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xffffffff),
+                              )),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<int>(
+                color: const Color(0xffffffff),
+                onSelected: (value) {
+                  if (value == 1) {
+                    SendMessage().sendMessage(customer, context);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem<int>(
+                    value: 1,
+                    child: Text('Send Message'),
                   ),
                 ],
+                child: const Icon(Icons.more_horiz),
               ),
-            ),
-            PopupMenuButton<int>(
-              color: const Color(0xffffffff),
-              onSelected: (value) {
-                if (value == 1) {
-                  SendMessage().sendMessage(customer, context);
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem<int>(
-                  value: 1,
-                  child: Text('Send Message'),
-                ),
-              ],
-              child: const Icon(Icons.more_horiz),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

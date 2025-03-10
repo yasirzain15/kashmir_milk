@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart';
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
@@ -80,6 +81,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
+
+ 
 
   Future<int> fetchTotalCustomers() async {
     try {
@@ -174,6 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+   
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
@@ -428,12 +432,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    Text(
-                      'My Customers',
-                      style: GoogleFonts.poppins(
-                        textStyle: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 23),
+                      child: Text(
+                        'My Customers',
+                        style: GoogleFonts.poppins(
+                          textStyle: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     )
@@ -469,7 +476,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: 51,
                 ),
 
                 // Recent Customers Header
@@ -729,8 +736,8 @@ class CustomerItem extends StatelessWidget {
             ),
             PopupMenuButton<int>(
               color: const Color(0xffffffff),
-              onSelected: (value) {
-                SendMessage().sendMessage(customer, context);
+              onSelected: (value) async{
+                await removeCustomerData(customer['CustomerId'], context);
               },
               itemBuilder: (context) => [
                 const PopupMenuItem<int>(
@@ -743,5 +750,33 @@ class CustomerItem extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+ Future<void> removeCustomerData(String customerId, BuildContext context) async {
+    try {
+      // Remove customer from Firebase
+      await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(customerId)
+          .delete();
+
+      // Remove customer from Hive
+      final box = await Hive.openBox('customersBox');
+      await box.delete(customerId);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Customer removed successfully"),
+          backgroundColor: Color(0xff78c1f3), // Updated color
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to remove customer: $e"),
+          backgroundColor: Color(0xffc30010),
+        ),
+      );
+    }
   }
 }

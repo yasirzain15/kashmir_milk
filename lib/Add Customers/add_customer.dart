@@ -104,12 +104,18 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
   // Function to save customer data to Firestore
   Future<void> _saveCustomerData() async {
-    if (_nameController.text.isEmpty || _phoneController.text.isEmpty) {
+    if (_nameController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
+        _cityController.text.isEmpty ||
+        _sectorController.text.isEmpty ||
+        _streetController.text.isEmpty ||
+        _houseController.text.isEmpty ||
+        _milkQuantityController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Name and Phone Number are required!"),
+          content: Text("Kindly Fill All Fields!"),
           duration: Duration(seconds: 1),
-          backgroundColor: Color(0xff78c1f3),
+          backgroundColor: Color(0xffc30010),
         ),
       );
 
