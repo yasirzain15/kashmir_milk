@@ -11,50 +11,54 @@ class CustomerDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Customer Details")),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('customers')
-            .doc(customerId)
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+            backgroundColor: Color(0xffffffff),
+            title: Text("Customer Details")),
+        body: FutureBuilder<DocumentSnapshot>(
+          future: FirebaseFirestore.instance
+              .collection('customers')
+              .doc(customerId)
+              .get(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return Center(child: Text("Customer data not found"));
-          }
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(child: Text("Customer data not found"));
+            }
 
-          Customer customer =
-              Customer.fromJson(snapshot.data!.data() as Map<String, dynamic>);
+            Customer customer = Customer.fromJson(
+                snapshot.data!.data() as Map<String, dynamic>);
 
-          return Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(
-                    'https://images.app.goo.gl/BUVB4Q7R3PVaSVoV7',
+            return Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundImage: NetworkImage(
+                      'https://images.app.goo.gl/BUVB4Q7R3PVaSVoV7',
+                    ),
                   ),
-                ),
-                SizedBox(height: 10),
-                Text(
-                  customer.name,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                Text(customer.sector),
-                SizedBox(height: 20),
-                Text(
-                    "Address: ${customer.houseNo}, ${customer.streetNo}, ${customer.sector}"),
-                Text("Contact: ${customer.phoneNo}"),
-              ],
-            ),
-          );
-        },
+                  SizedBox(height: 10),
+                  Text(
+                    customer.name,
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  Text(customer.sector),
+                  SizedBox(height: 20),
+                  Text(
+                      "Address: ${customer.houseNo}, ${customer.streetNo}, ${customer.sector}"),
+                  Text("Contact: ${customer.phoneNo}"),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
