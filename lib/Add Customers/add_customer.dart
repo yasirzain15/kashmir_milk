@@ -41,6 +41,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
   bool? isConnected;
 
+  final _formKey = GlobalKey<FormState>(); // Key for form validation
+
   @override
   void initState() {
     super.initState();
@@ -69,9 +71,6 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
 
       if (response.statusCode == 200) {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   SnackBar(content: Text("Internet Connected")),
-        // );
         return true; // Internet is working
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,24 +103,12 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
   // Function to save customer data to Firestore
   Future<void> _saveCustomerData() async {
-    if (_nameController.text.isEmpty ||
-        _phoneController.text.isEmpty ||
-        _cityController.text.isEmpty ||
-        _sectorController.text.isEmpty ||
-        _streetController.text.isEmpty ||
-        _houseController.text.isEmpty ||
-        _milkQuantityController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Kindly Fill All Fields!"),
-          duration: Duration(seconds: 1),
-          backgroundColor: Color(0xffc30010),
-        ),
-      );
-
+    if (!_formKey.currentState!.validate()) {
+      // If the form is not valid, stop execution
       setState(() {
         isLoading = false;
       });
+      return;
     }
 
     final customer = Customer(
@@ -143,31 +130,20 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('customer')
-            .add({
-          'Full Name': _nameController.text.trim(),
-          'City': _cityController.text.trim(),
-          'Sector': _sectorController.text.trim(),
-          'Street No': _streetController.text.trim(),
-          'House No': _houseController.text.trim(),
-          'Phone No': _phoneController.text.trim(),
-          'Milk Quantity': _milkQuantityController.text.trim(),
-          'estimated_price': estimatedPrice,
-          'Registration Time': FieldValue.serverTimestamp(),
-          'Price/Liter': pricePerLitre,
-          'customer_id': customerId,
-        });
+            .doc(customerId)
+            .set(customer.toJson());
+
         await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Customer Added Successfully!"),
+            content: Text("Customer Added Successfully! Online"),
             backgroundColor: Color(0xff78c1f3),
           ),
         );
 
         // Clear the fields after saving
-
-        // Reset estimated price
+        _formKey.currentState!.reset();
         setState(() {
           estimatedPrice = 0.0;
         });
@@ -180,12 +156,6 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       var box = Hive.box<Customer>('customers');
       await box.add(customer);
 
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content: Text("No Internet! Saved Offline."),
-      //     backgroundColor: Color(0xff78c1f3),
-      //   ),
-      // );
       _nameController.clear();
       _cityController.clear();
       _sectorController.clear();
@@ -220,157 +190,186 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             body: SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Profile Image Section (Ignored for now)
+                child: Form(
+                  key: _formKey, // Assign the form key
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 90),
 
-                    const SizedBox(height: 90),
+                      // Form Fields
+                      _buildTextField(
+                          controller: _nameController,
+                          icon: Icons.person_outline,
+                          hint: "Full Name",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Name is required";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _cityController,
+                          icon: Icons.location_city,
+                          hint: "City",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "City is required";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _sectorController,
+                          icon: Icons.business,
+                          hint: "Sector",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Sector is required";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _streetController,
+                          icon: Icons.streetview,
+                          hint: "Street No",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Street No is required";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _houseController,
+                          icon: Icons.home_outlined,
+                          hint: "House No",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "House No is required";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _phoneController,
+                          icon: Icons.phone,
+                          hint: "Phone Number",
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Phone Number is required";
+                            }
+                            if (value.length != 11) {
+                              return "Phone Number must be 11 digits";
+                            }
+                            return null;
+                          }),
+                      const SizedBox(height: 15),
+                      _buildTextField(
+                          controller: _milkQuantityController,
+                          icon: Icons.water_drop_outlined,
+                          hint: "Milk Quantity",
+                          isNumber: true,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return "Milk Quantity is required";
+                            }
+                            if (double.tryParse(value) == null) {
+                              return "Invalid quantity";
+                            }
+                            return null;
+                          }),
 
-                    // Form Fields
-                    _buildTextField(
-                        controller: _nameController,
-                        icon: Icons.person_outline,
-                        hint: "Full Name"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _cityController,
-                        icon: Icons.location_city,
-                        hint: "City"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _sectorController,
-                        icon: Icons.business,
-                        hint: "Sector"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _streetController,
-                        icon: Icons.streetview,
-                        hint: "Street No"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _houseController,
-                        icon: Icons.home_outlined,
-                        hint: "House No"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _phoneController,
-                        icon: Icons.phone,
-                        hint: "Phone Number"),
-                    SizedBox(
-                      height: 15,
-                    ),
-                    _buildTextField(
-                        controller: _milkQuantityController,
-                        icon: Icons.water_drop_outlined,
-                        hint: "Milk Quantity",
-                        isNumber: true),
-
-                    // Price Information (Dynamic Estimated Price)
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Price/L: 220 PKR",
-                          style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xffafafbd),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
-                          style: GoogleFonts.montserrat(
-                            textStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xffafafbd),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // Add Customer Button
-                    const SizedBox(height: 20),
-                    Container(
-                      width: double.infinity,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Color(0xff78c1f3),
-                            Color(0xff78a2f3),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        // borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: TextButton(
-                        onPressed: () async {
-                          FocusScope.of(context).unfocus();
-
-                          setState(() {
-                            isLoading = true;
-                          });
-
-                          // Validation: Check if required fields are empty
-                          if (_nameController.text.trim().isEmpty ||
-                              _phoneController.text.trim().isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text("Name and Phone Number are required!"),
-                                backgroundColor: Color(0xffc30010),
+                      // Price Information (Dynamic Estimated Price)
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Price/L: 220 PKR",
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xffafafbd),
                               ),
-                            );
-                            return; // Stop execution if validation fails
-                          }
-
-                          await _saveCustomerData(); // Save customer data
-
-                          final provider =
-                              Provider.of<Funs>(context, listen: false);
-
-                          if (isConnected!) {
-                            await provider
-                                .getall(); // Fetch from Firebase if online
-                          } else {
-                            await provider
-                                .getFromHive(); // Fetch from Hive if offline
-                          }
-
-                          // Navigate only after successful validation and saving
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DashboardScreen(),
                             ),
-                          );
-                        },
-                        child: const Text(
-                          "Add Customer",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500),
+                          ),
+                          Text(
+                            "Estimated: ${estimatedPrice.toStringAsFixed(2)} PKR",
+                            style: GoogleFonts.montserrat(
+                              textStyle: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                                color: Color(0xffafafbd),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Add Customer Button
+                      const SizedBox(height: 20),
+                      Container(
+                        width: double.infinity,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Color(0xff78c1f3),
+                              Color(0xff78a2f3),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: TextButton(
+                          onPressed: () async {
+                            FocusScope.of(context).unfocus();
+
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            if (_formKey.currentState!.validate()) {
+                              await _saveCustomerData(); // Save customer data
+
+                              final provider =
+                                  Provider.of<Funs>(context, listen: false);
+
+                              if (isConnected!) {
+                                await provider
+                                    .getall(); // Fetch from Firebase if online
+                              } else {
+                                await provider
+                                    .getFromHive(); // Fetch from Hive if offline
+                              }
+
+                              // Navigate only after successful validation and saving
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DashboardScreen(),
+                                ),
+                              );
+                            }
+
+                            setState(() {
+                              isLoading = false;
+                            });
+                          },
+                          child: const Text(
+                            "Add Customer",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -385,13 +384,15 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      required IconData icon,
-      required String hint,
-      bool isNumber = false}) {
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String hint,
+    bool isNumber = false,
+    String? Function(String?)? validator,
+  }) {
     return Container(
-      height: 51,
+      // height: 51,
       width: 311,
       decoration: BoxDecoration(
         color: Color(0xffffffff),
@@ -404,7 +405,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           ),
         ],
       ),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
@@ -422,6 +423,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             ),
           ),
         ),
+        validator: validator,
       ),
     );
   }

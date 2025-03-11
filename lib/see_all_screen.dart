@@ -144,7 +144,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
             context,
             MaterialPageRoute(
                 builder: (context) =>
-                    CustomerDetailScreen(customerId: customer['id'])));
+                    CustomerDetailScreen(customerId: customer['customer_id'])));
       },
       child: Card(
         color: const Color(0xffffffff),

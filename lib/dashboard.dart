@@ -11,6 +11,7 @@ import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/Add customers/add_customer.dart';
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/message_screen.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
@@ -81,8 +82,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-
- 
 
   Future<int> fetchTotalCustomers() async {
     try {
@@ -177,14 +176,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-   
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(15.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -407,7 +405,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 0),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: _imageList.asMap().entries.map((entry) {
@@ -429,7 +427,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   }).toList(),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 23),
                 Row(
                   children: [
                     Padding(
@@ -518,16 +516,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: SvgPicture.asset('assets/home.svg',
                     height: 30,
                     width: 30,
-                    color:
-                        _selectedIndex == 0 ? Colors.blue : Color(0xffafafbd)),
+                    color: _selectedIndex == 0
+                        ? Color(0xff292d32)
+                        : Color(0xffafafbd)),
                 onPressed: () => _onItemTapped(0),
               ),
               IconButton(
                 icon: SvgPicture.asset('assets/food.svg',
                     height: 30,
                     width: 30,
-                    color:
-                        _selectedIndex == 1 ? Colors.blue : Color(0xffafafbd)),
+                    color: _selectedIndex == 1
+                        ? Color(0xff292d32)
+                        : Color(0xffafafbd)),
                 onPressed: () => _onItemTapped(1),
               ),
               const SizedBox(width: 48),
@@ -535,16 +535,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 icon: SvgPicture.asset('assets/pay.svg',
                     height: 30,
                     width: 30,
-                    color:
-                        _selectedIndex == 2 ? Colors.blue : Color(0xffafafbd)),
+                    color: _selectedIndex == 2
+                        ? Color(0xff292d32)
+                        : Color(0xffafafbd)),
                 onPressed: () => _onItemTapped(2),
               ),
               IconButton(
                 icon: SvgPicture.asset('assets/profile.svg',
                     height: 30,
                     width: 30,
-                    color:
-                        _selectedIndex == 3 ? Colors.blue : Color(0xffafafbd)),
+                    color: _selectedIndex == 3
+                        ? Color(0xff292d32)
+                        : Color(0xffafafbd)),
                 onPressed: () => _onItemTapped(3),
               ),
             ],
@@ -580,8 +582,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onPressed: () {
                 // Add your logic here
               },
+              elevation: 0,
               shape: const CircleBorder(),
-              backgroundColor: Colors.blueAccent,
+              backgroundColor: Colors.transparent,
               child: PopupMenuButton(
                 color: Color(0xffffffff),
                 icon: const Icon(Icons.add, color: Colors.white),
@@ -736,13 +739,13 @@ class CustomerItem extends StatelessWidget {
             ),
             PopupMenuButton<int>(
               color: const Color(0xffffffff),
-              onSelected: (value) async{
-                await removeCustomerData(customer['CustomerId'], context);
+              onSelected: (value) async {
+                await removeCustomerData(customer['customer_id'], context);
               },
               itemBuilder: (context) => [
                 const PopupMenuItem<int>(
                   value: 1,
-                  child: Text('Send Message'),
+                  child: Text('Remove Customer'),
                 ),
               ],
             ),
@@ -751,25 +754,37 @@ class CustomerItem extends StatelessWidget {
       ),
     );
   }
-}
- Future<void> removeCustomerData(String customerId, BuildContext context) async {
+
+  Future<void> removeCustomerData(
+      String customerId, BuildContext context) async {
     try {
       // Remove customer from Firebase
-      await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(customerId)
-          .delete();
+
+      var docRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .collection('customer')
+          .doc(customerId);
+
+      var doc = await docRef.get();
+
+      if (doc.exists) {
+        print("Document exists, proceeding to delete...");
+        await docRef.delete();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Customer removed successfully"),
+            backgroundColor: Color(0xff78c1f3), // Updated color
+          ),
+        );
+        Provider.of<Funs>(context, listen: false).getall();
+      } else {
+        print("Document does not exist!");
+      }
 
       // Remove customer from Hive
-      final box = await Hive.openBox('customersBox');
-      await box.delete(customerId);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Customer removed successfully"),
-          backgroundColor: Color(0xff78c1f3), // Updated color
-        ),
-      );
+      // final box = Hive.box<Customer>('customers');
+      // await box.delete(customerId);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
