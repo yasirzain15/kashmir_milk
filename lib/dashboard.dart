@@ -739,9 +739,6 @@ class CustomerItem extends StatelessWidget {
             ),
             PopupMenuButton<int>(
               color: const Color(0xffffffff),
-              // onSelected: (value) async {
-              //   await removeCustomerData(customer['customer_id'], context);
-              // },
               itemBuilder: (context) => [
                 PopupMenuItem<int>(
                     value: 1,
