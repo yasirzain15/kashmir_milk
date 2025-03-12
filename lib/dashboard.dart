@@ -739,30 +739,36 @@ class CustomerItem extends StatelessWidget {
             ),
             PopupMenuButton<int>(
               color: const Color(0xffffffff),
-              onSelected: (value) async {
-                await removeCustomerData(customer['customer_id'], context);
-              },
+              // onSelected: (value) async {
+              //   await removeCustomerData(customer['customer_id'], context);
+              // },
               itemBuilder: (context) => [
                 PopupMenuItem<int>(
                     value: 1,
-                    child: ListTile(
-                      title: Text(
-                        'Remove Customer',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: Color(0xff292929),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await removeCustomerData(
+                            customer['customer_id'], context);
+                      },
+                      child: ListTile(
+                        title: Text(
+                          'Remove Customer',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Color(0xff292929),
+                            ),
                           ),
                         ),
-                      ),
-                      subtitle: Text(
-                        'Remove this customer from list',
-                        style: GoogleFonts.poppins(
-                          textStyle: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 10,
-                            color: Color(0xffafafbd),
+                        subtitle: Text(
+                          'Remove this customer from list',
+                          style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 10,
+                              color: Color(0xffafafbd),
+                            ),
                           ),
                         ),
                       ),
