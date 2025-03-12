@@ -743,10 +743,50 @@ class CustomerItem extends StatelessWidget {
                 await removeCustomerData(customer['customer_id'], context);
               },
               itemBuilder: (context) => [
-                const PopupMenuItem<int>(
-                  value: 1,
-                  child: Text('Remove Customer'),
-                ),
+                PopupMenuItem<int>(
+                    value: 1,
+                    child: ListTile(
+                      title: Text(
+                        'Remove Customer',
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: Color(0xff292929),
+                        )),
+                      ),
+                      subtitle: Text(
+                        'Remove this customer from list',
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 10,
+                          color: Color(0xffafafbd),
+                        )),
+                      ),
+                    )),
+                PopupMenuItem<int>(
+                    value: 2,
+                    child: ListTile(
+                      title: Text(
+                        'Update Customer',
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                          color: Color(0xff292929),
+                        )),
+                      ),
+                      subtitle: Text(
+                        'Update Customer record',
+                        style: GoogleFonts.poppins(
+                            textStyle: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 10,
+                          color: Color(0xffafafbd),
+                        )),
+                      ),
+                    )),
               ],
             ),
           ],
@@ -782,9 +822,10 @@ class CustomerItem extends StatelessWidget {
         print("Document does not exist!");
       }
 
-      // Remove customer from Hive
-      // final box = Hive.box<Customer>('customers');
-      // await box.delete(customerId);
+      final box = Hive.box<Customer>('customers');
+      await box.delete(customerId);
+
+      // SegmentedButtonState
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
