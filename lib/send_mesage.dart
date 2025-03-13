@@ -1,13 +1,14 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SendMessage {
-  void sendMessage(Map<String, dynamic> customer, BuildContext context) async {
+  void sendMessage(Customer customer, BuildContext context) async {
     try {
-      String customerName = customer['Full Name'] ?? "Customer";
-      String phoneNumber = customer['Phone No']?.toString().trim() ?? "";
+      String customerName = customer.name ?? "Customer";
+      String phoneNumber = customer.phoneNo?.toString().trim() ?? "";
 
       // Validate phone number
       if (phoneNumber.isEmpty || phoneNumber.length < 10) {
@@ -34,9 +35,9 @@ class SendMessage {
 
       // Parsing numerical values safely
       double? pricePerLiter =
-          double.tryParse(customer['Price/Liter']?.toString() ?? "0");
+          double.tryParse(customer.pricePerLiter?.toString() ?? "0");
       double? quantityLiters =
-          double.tryParse(customer['Milk Quantity']?.toString() ?? "0");
+          double.tryParse(customer.milkQuantity?.toString() ?? "0");
 
       if (pricePerLiter == null ||
           quantityLiters == null ||

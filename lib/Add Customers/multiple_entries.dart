@@ -121,7 +121,8 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
 
       if (hasInternet) {
         for (var row in fileData) {
-          await userCollection.add(row);
+          final docref = userCollection.doc();
+          await docref.set({"customer_id": docref.id, ...row});
           processedRows++;
           setState(() =>
               uploadProgress = ((processedRows / totalRows) * 100).round());

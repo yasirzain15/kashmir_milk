@@ -31,6 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<String> uniqueSectors = [];
   DateTime? lastBackPress;
   int _currentIndex = 0;
+
   final TextEditingController _customerController = TextEditingController();
   final List<String> _imageList = [
     'assets/image.png',
@@ -159,15 +160,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  List<Map<String, dynamic>> _filterCustomers(
-      List<Map<String, dynamic>> customers, String query) {
+  List<Customer> _filterCustomers(List<Customer> customers, String query) {
     if (query.isEmpty) {
       return customers; // Return all customers if the query is empty
     }
     return customers.where((customer) {
-      final name = customer['Full Name']?.toString().toLowerCase() ?? "";
-      final city = customer['City']?.toString().toLowerCase() ?? "";
-      final phone = customer['Phone No']?.toString().toLowerCase() ?? "";
+      final name = customer.name?.toLowerCase() ?? "";
+      final city = customer.city?.toLowerCase() ?? "";
+      final phone = customer.phoneNo ?? "";
       return name.contains(query.toLowerCase()) ||
           city.contains(query.toLowerCase()) ||
           phone.contains(query.toLowerCase());
@@ -419,9 +419,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         margin: const EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: _currentIndex == entry.key
-                              ? Colors.grey.shade400
-                              : Colors.blue,
+                          gradient: _currentIndex == entry.key
+                              ? LinearGradient(
+                                  colors: [
+                                    Color(0xff78c1f3),
+                                    Color(0xff78a2f3),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                )
+                              : LinearGradient(
+                                  colors: [
+                                    const Color.fromRGBO(189, 189, 189, 1),
+                                    Colors.grey.shade400,
+                                  ], // Solid color as a gradient
+                                ),
                         ),
                       ),
                     );
@@ -675,7 +687,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 }
 
 class CustomerItem extends StatelessWidget {
-  final Map<String, dynamic> customer;
+  final Customer customer;
 
   const CustomerItem({super.key, required this.customer});
 
@@ -694,7 +706,7 @@ class CustomerItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    customer['Full Name'] ?? "Unknown",
+                    customer.name ?? "Unknown",
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontWeight: FontWeight.w700,
@@ -705,7 +717,7 @@ class CustomerItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "City: ${customer['City'] ?? "Unknown"}",
+                    customer.city ?? "Unknown",
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontSize: 12,
@@ -716,7 +728,7 @@ class CustomerItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Phone: ${customer['Phone No'] ?? "Unknown"}",
+                    customer.phoneNo ?? "Unknown",
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontSize: 12,
@@ -726,7 +738,7 @@ class CustomerItem extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "Milk Quantity: ${customer['Milk Quantity'] ?? "Unknown"}",
+                    customer.milkQuantity ?? "Unknown",
                     style: GoogleFonts.poppins(
                       textStyle: const TextStyle(
                         fontSize: 12,
@@ -744,8 +756,9 @@ class CustomerItem extends StatelessWidget {
                     value: 1,
                     child: GestureDetector(
                       onTap: () async {
+                        Navigator.pop(context);
                         await removeCustomerData(
-                            customer['customer_id'], context);
+                            customer.customerId ?? '', context);
                       },
                       child: ListTile(
                         title: Text(
@@ -814,7 +827,6 @@ class CustomerItem extends StatelessWidget {
       var doc = await docRef.get();
 
       if (doc.exists) {
-        // print("Document exists, proceeding to delete...");
         await docRef.delete();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -824,11 +836,17 @@ class CustomerItem extends StatelessWidget {
         );
         Provider.of<Funs>(context, listen: false).getall();
       } else {
-        // print("Document does not exist!");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Customer not found"),
+            backgroundColor: Color(0xffc30010),
+          ),
+        );
       }
 
       final box = Hive.box<Customer>('customers');
       await box.delete(customerId);
+      Provider.of<Funs>(context, listen: false).getall();
 
       // SegmentedButtonState
     } catch (e) {

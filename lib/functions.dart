@@ -6,7 +6,7 @@ import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:uuid/uuid.dart';
 
 class Funs extends ChangeNotifier {
-  List<Map<String, dynamic>> customers = [];
+  List<Customer> customers = [];
   List<String> sectors = []; // List to store sector names
   List<int> sectorCounts = []; // Store the number of customers in each sector
   Future<void> getall() async {
@@ -18,11 +18,13 @@ class Funs extends ChangeNotifier {
           .collection('customer');
 
       final response = await userCollection.get();
-      final existedcustomers = customers.map((e) => e['customer_id']).toSet();
+      final existedcustomers =
+          customers.map((customer) => customer.customerId).toSet();
       final newCustomers = response.docs
           .where((customer) => !existedcustomers.contains(
               (customer.data()! as Map<String, dynamic>)['customer_id']))
-          .map((customer) => customer.data() as Map<String, dynamic>)
+          .map((customer) =>
+              Customer.fromJson(customer.data() as Map<String, dynamic>))
           .toList();
       customers.addAll(newCustomers);
       notifyListeners();
@@ -39,11 +41,12 @@ class Funs extends ChangeNotifier {
     final response = box.values;
 
     // Use a Set to keep track of existing customer IDs
-    final existingCustomerIds = customers.map((e) => e['customer_id']).toSet();
+    final existingCustomerIds =
+        customers.map((customer) => customer.customerId).toSet();
 
     final newCustomers = response
         .where((customer) => !existingCustomerIds.contains(customer.customerId))
-        .map((customer) => customer.toJson())
+        .map((customer) => customer)
         .toList();
 
     customers.addAll(newCustomers);

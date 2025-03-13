@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
@@ -16,7 +17,7 @@ class SeeallScreen extends StatefulWidget {
 }
 
 class _SeeallScreenState extends State<SeeallScreen> {
-  List<Map<String, dynamic>> customers = [];
+  List<Customer> customers = [];
   String _searchQuery = ""; // Variable to store the search query
 
   // Fetch all customers from Firestore
@@ -28,7 +29,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
 
       setState(() {
         customers = response.docs.map((customer) {
-          return customer.data() as Map<String, dynamic>;
+          return customer.data() as Customer;
         }).toList();
       });
     } catch (e) {
@@ -37,15 +38,14 @@ class _SeeallScreenState extends State<SeeallScreen> {
   }
 
   // Function to filter customers based on the search query
-  List<Map<String, dynamic>> _filterCustomers(
-      List<Map<String, dynamic>> customers, String query) {
+  List<Customer> _filterCustomers(List<Customer> customers, String query) {
     if (query.isEmpty) {
       return customers; // Return all customers if the query is empty
     }
     return customers.where((customer) {
-      final name = customer['Full Name']?.toString().toLowerCase() ?? "";
-      final city = customer['City']?.toString().toLowerCase() ?? "";
-      final phone = customer['Phone No']?.toString().toLowerCase() ?? "";
+      final name = customer.name?.toString().toLowerCase() ?? "";
+      final city = customer.city?.toString().toLowerCase() ?? "";
+      final phone = customer.phoneNo?.toString().toLowerCase() ?? "";
       return name.contains(query.toLowerCase()) ||
           city.contains(query.toLowerCase()) ||
           phone.contains(query.toLowerCase());
@@ -125,17 +125,13 @@ class _SeeallScreenState extends State<SeeallScreen> {
   }
 
   // Build UI for each customer item
-  Widget buildCustomerItem(Map<String, dynamic> customer) {
-    String name = customer["Full Name"] ?? "Unknown";
-    String city = customer["City"] ?? "Unknown City";
-    String address = [
-      customer["House No"],
-      customer["Street No"],
-      customer["Sector"]
-    ]
+  Widget buildCustomerItem(Customer customer) {
+    String name = customer.name ?? "Unknown";
+    String city = customer.city ?? "Unknown City";
+    String address = [customer.houseNo, customer.streetNo, customer.streetNo]
         .where((element) => element != null && element.toString().isNotEmpty)
         .join(", ");
-    String phone = customer['Phone No']?.toString() ?? "N/A";
+    String phone = customer.phoneNo?.toString() ?? "N/A";
     // String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
     return GestureDetector(
@@ -143,8 +139,8 @@ class _SeeallScreenState extends State<SeeallScreen> {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    CustomerDetailScreen(customerId: customer['customer_id'])));
+                builder: (context) => CustomerDetailScreen(
+                    customerId: customer.customerId ?? "")));
       },
       child: Card(
         color: const Color(0xffffffff),
@@ -202,7 +198,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "Milk Quantity: ${customer['Milk Quantity'] ?? "Unknown"}",
+                      "Milk Quantity: ${customer.milkQuantity ?? "Unknown"}",
                       style: const TextStyle(
                         color: Color(0xff78c1f3),
                         fontSize: 12,

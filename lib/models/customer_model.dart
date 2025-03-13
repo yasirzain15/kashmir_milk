@@ -5,56 +5,56 @@ part 'customer_model.g.dart';
 @HiveType(typeId: 0)
 class Customer {
   @HiveField(0)
-  final String name;
+  final String? name;
 
   @HiveField(1)
-  final String city;
+  final String? city;
 
   @HiveField(2)
-  final String sector;
+  final String? sector;
 
   @HiveField(3)
-  final String streetNo;
+  final String? streetNo;
 
   @HiveField(4)
-  final String houseNo;
+  final String? houseNo;
 
   @HiveField(5)
-  final String phoneNo;
+  final String? phoneNo;
 
   @HiveField(6)
-  final String milkQuantity;
+  final String? milkQuantity;
+
+  @HiveField(7)
+  final double? pricePerLiter;
 
   @HiveField(8)
-  final double pricePerLiter;
-
-  @HiveField(9)
-  final String customerId;
+  final String? customerId;
 
   Customer({
-    required this.name,
-    required this.city,
-    required this.sector,
-    required this.streetNo,
-    required this.houseNo,
-    required this.phoneNo,
-    required this.milkQuantity,
-    required this.pricePerLiter,
-    required this.customerId,
+    this.name,
+    this.city,
+    this.sector,
+    this.streetNo,
+    this.houseNo,
+    this.phoneNo,
+    this.milkQuantity,
+    this.pricePerLiter,
+    this.customerId,
   });
 
   /// Convert JSON Map to `Customer` object
   factory Customer.fromJson(Map<String, dynamic> json) {
     return Customer(
-      name: json['Full Name']?.toString() ?? 'Unknown Name',
-      city: json['City']?.toString() ?? 'Unknown City',
-      sector: json['Sector']?.toString() ?? 'Unknown Sector',
-      streetNo: json['Street No']?.toString() ?? 'Unknown Street',
-      houseNo: json['House No']?.toString() ?? "Unknown House",
-      phoneNo: json['Phone No']?.toString() ?? 'Unknown Phone',
-      milkQuantity: json['Milk Quantity']?.toString() ?? "Unknown",
-      pricePerLiter: (json['Price/Liter'] as num).toDouble(),
-      customerId: json['customer_id'] ?? ''.toString(),
+      name: json['Full Name']?.toString(),
+      city: json['City']?.toString(),
+      sector: json['Sector']?.toString(),
+      streetNo: json['Street No']?.toString(),
+      houseNo: json['House No']?.toString(),
+      phoneNo: json['Phone Number']?.toString(),
+      milkQuantity: json['Milk Quantity']?.toString(),
+      pricePerLiter: (json['Price/Liter'] as num?)?.toDouble(),
+      customerId: json['customer_id']?.toString(),
     );
   }
 
@@ -66,7 +66,7 @@ class Customer {
       'Sector': sector,
       'Street No': streetNo,
       'House No': houseNo,
-      'Phone No': phoneNo,
+      'Phone Number': phoneNo,
       'Milk Quantity': milkQuantity,
       'Price/Liter': pricePerLiter,
       'customer_id': customerId,

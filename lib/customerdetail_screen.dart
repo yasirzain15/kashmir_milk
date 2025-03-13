@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors_in_immutables
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
@@ -13,9 +11,6 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-            backgroundColor: Color(0xffffffff),
-            title: Text("Customer Details")),
         body: FutureBuilder<DocumentSnapshot>(
           future: FirebaseFirestore.instance
               .collection('customers')
@@ -27,6 +22,8 @@ class CustomerDetailScreen extends StatelessWidget {
             }
 
             if (!snapshot.hasData || !snapshot.data!.exists) {
+              // Debug: Print the customerId and snapshot data
+
               return Center(child: Text("Customer data not found"));
             }
 
@@ -46,14 +43,14 @@ class CustomerDetailScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    customer.name,
+                    customer.name ?? 'Unknown name',
                     style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  Text(customer.sector),
+                  Text(customer.sector ?? 'Unknown sector'),
                   SizedBox(height: 20),
                   Text(
-                      "Address: ${customer.houseNo}, ${customer.streetNo}, ${customer.sector}"),
-                  Text("Contact: ${customer.phoneNo}"),
+                      "Address: ${customer.houseNo ?? 'N/A'}, ${customer.streetNo ?? 'N/A'}, ${customer.sector ?? 'N/A'}"),
+                  Text("Contact: ${customer.phoneNo ?? 'N/A'}"),
                 ],
               ),
             );

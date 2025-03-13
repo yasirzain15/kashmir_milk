@@ -2,47 +2,34 @@
     package="com.example.kashmeer_milk">
 
     <!-- ✅ Required Permissions for Android 13+ -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
 
-    <!-- ✅ Optional Permissions (Add only if needed) -->
-    <!-- <uses-permission android:name="android.permission.CAMERA" /> -->
-    <!-- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> -->
-
-    <!-- ✅ Queries for Android 11+ -->
     <queries>
         <intent>
-            <action android:name="android.intent.action.GET_CONTENT" />
+            <action android:name="android.intent.action.GET_CONTENT"/>
         </intent>
         <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT" />
-            <data android:mimeType="text/plain" />
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
         </intent>
     </queries>
 
     <application
-        android:name="io.flutter.app.FlutterApplication"
         android:label="kashmeer_milk"
-        android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:theme="@style/LaunchTheme"
-        android:usesCleartextTraffic="true"> <!-- Allow HTTP traffic (optional) -->
+        android:icon="@mipmap/ic_launcher">
+
 
         <!-- ✅ Disable Impeller to fix black screen issue -->
-        <meta-data
-            android:name="flutter.renderer"
-            android:value="skia" />
-
+        <meta-data android:name="flutter.renderer" android:value="skia"/>
+        
         <!-- ✅ Required Flutter metadata -->
-        <meta-data
-            android:name="flutterEmbedding"
-            android:value="2" />
+        <meta-data android:name="flutterEmbedding" android:value="2"/>
 
-        <!-- ✅ Main Activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -52,19 +39,15 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- ✅ Normal Theme for Flutter -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme" />
+                android:resource="@style/NormalTheme"/>
 
-            <!-- ✅ Launcher Intent Filter -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <!-- ✅ Optional: Add other activities, services, or receivers here -->
 
     </application>
 
