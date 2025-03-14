@@ -786,10 +786,13 @@ class _CustomerItemState extends State<CustomerItem> {
                       child: GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      CustomerRegistrationForm()));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CustomerRegistrationForm(
+                                  // customer: widget.customer,
+                                  ),
+                            ),
+                          );
                         },
                         child: ListTile(
                           title: Text(

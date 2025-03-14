@@ -15,7 +15,9 @@ import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
 class CustomerRegistrationForm extends StatefulWidget {
-  const CustomerRegistrationForm({super.key});
+  final Customer? customer;
+
+  const CustomerRegistrationForm({super.key, this.customer});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -46,6 +48,13 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   @override
   void initState() {
     super.initState();
+    _nameController.text = widget.customer?.name ?? '';
+    _cityController.text = widget.customer?.city ?? '';
+    _sectorController.text = widget.customer?.sector ?? '';
+    _streetController.text = widget.customer?.streetNo ?? '';
+    _houseController.text = widget.customer?.houseNo ?? '';
+    _phoneController.text = widget.customer?.phoneNo ?? '';
+    _milkQuantityController.text = widget.customer?.milkQuantity ?? '';
     _milkQuantityController.addListener(_updateEstimatedPrice);
   }
 
@@ -332,32 +341,34 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                               isLoading = true;
                             });
 
-                            if (_formKey.currentState!.validate()) {
-                              await _saveCustomerData(); // Save customer data
+                            try {
+                              if (_formKey.currentState!.validate()) {
+                                await _saveCustomerData(); // Save customer data
 
-                              final provider =
-                                  Provider.of<Funs>(context, listen: false);
+                                final provider =
+                                    Provider.of<Funs>(context, listen: false);
 
-                              if (isConnected!) {
-                                await provider
-                                    .getall(); // Fetch from Firebase if online
-                              } else {
-                                await provider
-                                    .getFromHive(); // Fetch from Hive if offline
+                                if (isConnected ?? false) {
+                                  // Handle null safety
+                                  await provider
+                                      .getall(); // Fetch from Firebase if online
+                                } else {
+                                  await provider
+                                      .getFromHive(); // Fetch from Hive if offline
+                                }
+
+                                // Navigate back after saving data
+                                Navigator.pop(context);
                               }
-
-                              // Navigate only after successful validation and saving
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DashboardScreen(),
-                                ),
-                              );
+                            } catch (e) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                  content: Text(
+                                      "Failed to save customer. Please try again.")));
+                            } finally {
+                              setState(() {
+                                isLoading = false;
+                              });
                             }
-
-                            setState(() {
-                              isLoading = false;
-                            });
                           },
                           child: const Text(
                             "Add Customer",
