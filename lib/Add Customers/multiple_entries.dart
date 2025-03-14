@@ -174,8 +174,18 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Upload CSV"),
+          automaticallyImplyLeading: true,
           backgroundColor: Color(0xff78c1f3),
+          title: Text(
+            "Upload CSV File",
+            style: GoogleFonts.poppins(
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
         body: Center(
           child: Column(
@@ -186,15 +196,25 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
                 child: buildButton(Icons.upload_file, "Upload File"),
               ),
               const SizedBox(height: 10),
-              GestureDetector(
-                onTap: exportToStorage,
-                child: buildButton(Icons.cloud_upload,
-                    isUploading ? "Uploading..." : "Export File"),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GestureDetector(
+                  onTap: exportToStorage,
+                  child: buildButton(Icons.cloud_upload,
+                      isUploading ? "Uploading..." : "Export File"),
+                ),
               ),
               if (fileName != null) Text("Selected File: $fileName"),
               if (isUploading)
-                LinearProgressIndicator(value: uploadProgress / 100),
-              if (isUploading) Text("Upload Progress: $uploadProgress%"),
+                LinearProgressIndicator(
+                  value: uploadProgress / 100,
+                  color: Color(0xff78c1f3),
+                ),
+              if (isUploading)
+                Text("Upload Progress: $uploadProgress%",
+                    style: TextStyle(
+                      color: Color(0xff78c1f3),
+                    )),
             ],
           ),
         ),

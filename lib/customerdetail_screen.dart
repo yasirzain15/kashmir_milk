@@ -11,6 +11,7 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Color(0xffffffff),
         body: FutureBuilder<DocumentSnapshot>(
           future: FirebaseFirestore.instance
               .collection('customers')
@@ -18,7 +19,10 @@ class CustomerDetailScreen extends StatelessWidget {
               .get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return Center(
+                  child: CircularProgressIndicator(
+                color: Color(0xff78c1f3),
+              ));
             }
 
             if (!snapshot.hasData || !snapshot.data!.exists) {

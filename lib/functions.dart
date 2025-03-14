@@ -7,6 +7,8 @@ import 'package:uuid/uuid.dart';
 
 class Funs extends ChangeNotifier {
   List<Customer> customers = [];
+  List<Customer> filteredCustomers = [];
+
   List<String> sectors = []; // List to store sector names
   List<int> sectorCounts = []; // Store the number of customers in each sector
   Future<void> getall() async {
@@ -27,6 +29,7 @@ class Funs extends ChangeNotifier {
               Customer.fromJson(customer.data() as Map<String, dynamic>))
           .toList();
       customers.addAll(newCustomers);
+      filteredCustomers = customers;
       notifyListeners();
 
       // customers.clear(); // Prevent duplicates by clearing old data
@@ -50,6 +53,26 @@ class Funs extends ChangeNotifier {
         .toList();
 
     customers.addAll(newCustomers);
+    notifyListeners();
+  }
+
+  void filterCustomers(String query) {
+    if (query.isEmpty) {
+      filteredCustomers =
+          customers; // Return all customers if the query is empty
+    }
+    filteredCustomers = customers.where((customer) {
+      final name = customer.name?.toLowerCase() ?? "";
+      final city = customer.city?.toLowerCase() ?? "";
+      final phone = customer.phoneNo ?? "";
+      return name.contains(query.toLowerCase()) ||
+          city.contains(query.toLowerCase()) ||
+          phone.contains(query.toLowerCase());
+    }).toList();
+  }
+
+  void deleteCustomer(Customer customer) {
+    customers.remove(customer);
     notifyListeners();
   }
 

@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
+import 'dart:math';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -128,10 +130,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     if (hour >= 5 && hour < 12) {
       greeting = "Good Morning";
-    } else if (hour >= 12 && hour < 17) {
+    } else if (hour >= 12 && hour < 16) {
       greeting = "Good Afternoon";
-    } else {
+    } else if (hour >= 16 && hour < 20) {
       greeting = "Good Evening";
+    } else {
+      greeting = "Good Night";
     }
   }
 
@@ -158,20 +162,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       );
     }
-  }
-
-  List<Customer> _filterCustomers(List<Customer> customers, String query) {
-    if (query.isEmpty) {
-      return customers; // Return all customers if the query is empty
-    }
-    return customers.where((customer) {
-      final name = customer.name?.toLowerCase() ?? "";
-      final city = customer.city?.toLowerCase() ?? "";
-      final phone = customer.phoneNo ?? "";
-      return name.contains(query.toLowerCase()) ||
-          city.contains(query.toLowerCase()) ||
-          phone.contains(query.toLowerCase());
-    }).toList();
   }
 
   @override
@@ -373,7 +363,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         Positioned(
                           right: 20, // Adjust position
-                          bottom: 40, // Adjust position
+                          bottom: 75, // Adjust position
                           child: Text(
                             "We have\nso fresh milk",
                             style: TextStyle(
@@ -462,26 +452,26 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 17),
                   child: SingleChildScrollView(
-                    child: TextFormField(
-                      controller: _customerController,
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        hintText: 'Search Customers',
-                        hintStyle: GoogleFonts.poppins(
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: Color(0xffa6a6a6),
+                    child: Consumer<Funs>(
+                      builder: (context, provider, child) => TextFormField(
+                        controller: _customerController,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Search Customers',
+                          hintStyle: GoogleFonts.poppins(
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Color(0xffa6a6a6),
+                            ),
                           ),
+                          filled: true, // Enable background fill
+                          fillColor: Color(0x2bc5e0f2), // Set background color
                         ),
-                        filled: true, // Enable background fill
-                        fillColor: Color(0x2bc5e0f2), // Set background color
+                        onChanged: (value) {
+                          provider.filterCustomers(value);
+                        },
                       ),
-                      onChanged: (value) {
-                        setState(() {
-                          _searchQuery = value; // Update the search query
-                        });
-                      },
                     ),
                   ),
                 ),
@@ -498,17 +488,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Consumer<Funs>(
                     builder: (context, provider, child) {
                       // Filter customers based on the search query
-                      final filteredCustomers =
-                          _filterCustomers(provider.customers, _searchQuery);
 
                       return ListView.separated(
-                        itemCount: filteredCustomers.length,
+                        itemCount: provider.filteredCustomers.length,
                         itemBuilder: (context, index) {
                           return CustomerItem(
-                            customer: filteredCustomers[index],
+                            customer: provider.filteredCustomers[index],
                           );
                         },
-                        separatorBuilder: (context, index) => const Divider(),
+                        separatorBuilder: (context, index) => Divider(),
                       );
                     },
                   ),
@@ -686,128 +674,148 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 }
 
-class CustomerItem extends StatelessWidget {
+class CustomerItem extends StatefulWidget {
   final Customer customer;
 
-  const CustomerItem({super.key, required this.customer});
+  const CustomerItem({
+    super.key,
+    required this.customer,
+  });
 
   @override
+  State<CustomerItem> createState() => _CustomerItemState();
+}
+
+class _CustomerItemState extends State<CustomerItem> {
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      color: const Color(0xffffffff),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    customer.name ?? "Unknown",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
-                        color: Colors.black,
+    return Consumer<Funs>(
+      builder: (context, provider, child) => Card(
+        color: const Color(0xffffffff),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.customer.name ?? "Unknown",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    customer.city ?? "Unknown",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.customer.city ?? "Unknown",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    customer.phoneNo ?? "Unknown",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.customer.phoneNo ?? "Unknown",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    customer.milkQuantity ?? "Unknown",
-                    style: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xff78c1f3),
+                    const SizedBox(height: 4),
+                    Text(
+                      widget.customer.milkQuantity ?? "Unknown",
+                      style: GoogleFonts.poppins(
+                        textStyle: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xff78c1f3),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            PopupMenuButton<int>(
-              color: const Color(0xffffffff),
-              itemBuilder: (context) => [
-                PopupMenuItem<int>(
-                    value: 1,
-                    child: GestureDetector(
-                      onTap: () async {
-                        Navigator.pop(context);
-                        await removeCustomerData(
-                            customer.customerId ?? '', context);
-                      },
-                      child: ListTile(
-                        title: Text(
-                          'Remove Customer',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
+              PopupMenuButton<int>(
+                color: const Color(0xffffffff),
+                itemBuilder: (context) => [
+                  PopupMenuItem<int>(
+                      value: 1,
+                      child: GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          await removeCustomerData(
+                              widget.customer.customerId ?? '', context);
+                          provider.deleteCustomer(widget.customer);
+                        },
+                        child: ListTile(
+                          title: Text(
+                            'Remove Customer',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                color: Color(0xff292929),
+                              ),
+                            ),
+                          ),
+                          subtitle: Text(
+                            'Remove this customer from list',
+                            style: GoogleFonts.poppins(
+                              textStyle: TextStyle(
+                                fontWeight: FontWeight.w400,
+                                fontSize: 10,
+                                color: Color(0xffafafbd),
+                              ),
+                            ),
+                          ),
+                        ),
+                      )),
+                  PopupMenuItem<int>(
+                      value: 2,
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      CustomerRegistrationForm()));
+                        },
+                        child: ListTile(
+                          title: Text(
+                            'Update Customer',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 12,
                               color: Color(0xff292929),
-                            ),
+                            )),
                           ),
-                        ),
-                        subtitle: Text(
-                          'Remove this customer from list',
-                          style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
+                          subtitle: Text(
+                            'Update Customer record',
+                            style: GoogleFonts.poppins(
+                                textStyle: TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 10,
                               color: Color(0xffafafbd),
-                            ),
+                            )),
                           ),
                         ),
-                      ),
-                    )),
-                PopupMenuItem<int>(
-                    value: 2,
-                    child: ListTile(
-                      title: Text(
-                        'Update Customer',
-                        style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                          color: Color(0xff292929),
-                        )),
-                      ),
-                      subtitle: Text(
-                        'Update Customer record',
-                        style: GoogleFonts.poppins(
-                            textStyle: TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 10,
-                          color: Color(0xffafafbd),
-                        )),
-                      ),
-                    )),
-              ],
-            ),
-          ],
+                      )),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
