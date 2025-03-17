@@ -35,7 +35,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   final TextEditingController _milkQuantityController = TextEditingController();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String customerId = const Uuid().v1();
+  late String customerId = const Uuid().v1();
 
   double estimatedPrice = 0.0;
   final double pricePerLitre = 220.0;
@@ -48,6 +48,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   @override
   void initState() {
     super.initState();
+    customerId =
+        widget.customer?.customerId ?? const Uuid().v1().replaceAll("-", "");
     _nameController.text = widget.customer?.name ?? '';
     _cityController.text = widget.customer?.city ?? '';
     _sectorController.text = widget.customer?.sector ?? '';
@@ -103,6 +105,36 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     }
   }
 
+  Future<void> updateCustomerData(Customer customer) async {
+    try {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Update the customer document in Firestore
+      await firestore
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('customer')
+          .doc(customer.customerId)
+          .set(customer.toJson());
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Customer Updated Successfully!"),
+          backgroundColor: Color(0xff78c1f3),
+        ),
+      );
+    } catch (e) {
+      // Handle errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to update customer: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _updateEstimatedPrice() {
     setState(() {
       double quantity = double.tryParse(_milkQuantityController.text) ?? 0.0;
@@ -129,8 +161,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       phoneNo: _phoneController.text.trim(),
       milkQuantity: _milkQuantityController.text.trim(),
       pricePerLiter: pricePerLitre,
-      customerId: customerId,
+      customerId: customerId, // Use the preserved or generated customerId
     );
+
     isConnected = await _checkInternetConnection();
 
     if (isConnected!) {
@@ -139,14 +172,14 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('customer')
-            .doc(customerId)
+            .doc(customerId) // Use the same customerId for updates
             .set(customer.toJson());
 
         await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Customer Added Successfully! Online"),
+            content: Text("Customer Added/Updated Successfully!"),
             backgroundColor: Color(0xff78c1f3),
           ),
         );
@@ -185,7 +218,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
               automaticallyImplyLeading: true,
               backgroundColor: Color(0xff78c1f3),
               title: Text(
-                "Customer Registration",
+                widget.customer == null
+                    ? 'Customer Registration'
+                    : 'Update Customer',
                 style: GoogleFonts.poppins(
                   textStyle: const TextStyle(
                     fontSize: 16,
@@ -343,7 +378,27 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
                             try {
                               if (_formKey.currentState!.validate()) {
-                                await _saveCustomerData(); // Save customer data
+                                final updatedCustomer = Customer(
+                                  name: _nameController.text.trim(),
+                                  city: _cityController.text.trim(),
+                                  sector: _sectorController.text.trim(),
+                                  streetNo: _streetController.text.trim(),
+                                  houseNo: _houseController.text.trim(),
+                                  phoneNo: _phoneController.text.trim(),
+                                  milkQuantity:
+                                      _milkQuantityController.text.trim(),
+                                  pricePerLiter: pricePerLitre,
+                                  customerId: customerId,
+                                );
+                                if (widget.customer != null) {
+                                  // If updating an existing customer
+                                  await updateCustomerData(
+                                    updatedCustomer,
+                                  );
+                                } else {
+                                  // If adding a new customer
+                                  await _saveCustomerData();
+                                }
 
                                 final provider =
                                     Provider.of<Funs>(context, listen: false);
@@ -353,8 +408,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                                   await provider
                                       .getall(); // Fetch from Firebase if online
                                 } else {
-                                  await provider
-                                      .getFromHive(); // Fetch from Hive if offline
+                                  await provider.getFromHive();
                                 }
 
                                 // Navigate back after saving data
@@ -363,15 +417,17 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                   content: Text(
-                                      "Failed to save customer. Please try again.")));
+                                      "Failed to save/Update customer. Please try again.")));
                             } finally {
                               setState(() {
                                 isLoading = false;
                               });
                             }
                           },
-                          child: const Text(
-                            "Add Customer",
+                          child: Text(
+                            widget.customer == null
+                                ? 'Add Customer'
+                                : 'Update Customer',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

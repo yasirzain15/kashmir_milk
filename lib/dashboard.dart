@@ -789,8 +789,8 @@ class _CustomerItemState extends State<CustomerItem> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => CustomerRegistrationForm(
-                                  // customer: widget.customer,
-                                  ),
+                                customer: widget.customer,
+                              ),
                             ),
                           );
                         },
