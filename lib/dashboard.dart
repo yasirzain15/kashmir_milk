@@ -857,7 +857,7 @@ class _CustomerItemState extends State<CustomerItem> {
 
       final box = Hive.box<Customer>('customers');
       await box.delete(customerId);
-      Provider.of<Funs>(context, listen: false).getall();
+      Provider.of<Funs>(context, listen: false).getFromHive();
 
       // SegmentedButtonState
     } catch (e) {

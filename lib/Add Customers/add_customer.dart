@@ -407,9 +407,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                                   // Handle null safety
                                   await provider
                                       .getall(); // Fetch from Firebase if online
-                                } else {
-                                  await provider.getFromHive();
-                                }
+                                } else {}
 
                                 // Navigate back after saving data
                                 Navigator.pop(context);
