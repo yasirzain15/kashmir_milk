@@ -105,7 +105,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     }
   }
 
-  Future<void> updateCustomerData(Customer customer) async {
+  Future<void> updateCustomerData(
+      Customer customer, BuildContext context) async {
     try {
       final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -117,10 +118,22 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           .doc(customer.customerId)
           .set(customer.toJson());
 
+      // Update the customer data in Hive
+      final box = Hive.box<Customer>('customers');
+
+      final keyToUpdate = box.keys.firstWhere(
+        (key) => box.get(key)?.customerId == customer.customerId,
+        orElse: () => null,
+      );
+
+      if (keyToUpdate != null) {
+        await box.put(keyToUpdate, customer);
+      }
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text("Customer Updated Successfully!"),
+          content: Text("Customer Updated Successfully! ✅"),
           backgroundColor: Color(0xff78c1f3),
         ),
       );
@@ -128,7 +141,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to update customer: ${e.toString()}"),
+          content: Text("Failed to update customer: ${e.toString()} ❌"),
           backgroundColor: Colors.red,
         ),
       );
@@ -145,7 +158,6 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
   // Function to save customer data to Firestore
   Future<void> _saveCustomerData() async {
     if (!_formKey.currentState!.validate()) {
-      // If the form is not valid, stop execution
       setState(() {
         isLoading = false;
       });
@@ -161,7 +173,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       phoneNo: _phoneController.text.trim(),
       milkQuantity: _milkQuantityController.text.trim(),
       pricePerLiter: pricePerLitre,
-      customerId: customerId, // Use the preserved or generated customerId
+      customerId: customerId,
     );
 
     isConnected = await _checkInternetConnection();
@@ -172,9 +184,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('customer')
-            .doc(customerId) // Use the same customerId for updates
-            .set(customer.toJson());
+            .doc(customerId)
+            .set(customer.toJson(), SetOptions(merge: true));
 
+        // Refresh the customer list in the provider
         await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -184,11 +197,13 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           ),
         );
 
-        // Clear the fields after saving
         _formKey.currentState!.reset();
         setState(() {
           estimatedPrice = 0.0;
         });
+
+        // Navigate back to the dashboard
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Error: ${e.toString()}")),
@@ -198,6 +213,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       var box = Hive.box<Customer>('customers');
       await box.add(customer);
 
+      // Refresh the customer list in the provider
+      await Provider.of<Funs>(context, listen: false).getFromHive();
+
       _nameController.clear();
       _cityController.clear();
       _sectorController.clear();
@@ -205,6 +223,9 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       _houseController.clear();
       _phoneController.clear();
       _milkQuantityController.clear();
+
+      // Navigate back to the dashboard
+      Navigator.pop(context);
     }
   }
 
@@ -393,8 +414,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
                                 if (widget.customer != null) {
                                   // If updating an existing customer
                                   await updateCustomerData(
-                                    updatedCustomer,
-                                  );
+                                      updatedCustomer, context);
                                 } else {
                                   // If adding a new customer
                                   await _saveCustomerData();

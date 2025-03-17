@@ -62,10 +62,16 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
 
       List<String> headers =
           csvTable.first.map((e) => e.toString().trim()).toList();
-      List<Map<String, dynamic>> dataList = csvTable
-          .skip(1)
-          .map((row) => Map<String, dynamic>.fromIterables(headers, row))
-          .toList();
+
+      List<Map<String, dynamic>> dataList = csvTable.skip(1).map((row) {
+        var map = Map<String, dynamic>.fromIterables(headers, row.map((value) {
+          // Convert numbers to string if needed
+          return (value is double)
+              ? value.toInt().toString()
+              : value.toString();
+        }));
+        return map;
+      }).toList();
 
       setState(() {
         fileData = dataList;

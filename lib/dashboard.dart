@@ -828,7 +828,6 @@ class _CustomerItemState extends State<CustomerItem> {
       String customerId, BuildContext context) async {
     try {
       // Remove customer from Firebase
-
       var docRef = FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser?.uid)
@@ -841,29 +840,45 @@ class _CustomerItemState extends State<CustomerItem> {
         await docRef.delete();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Customer removed successfully"),
-            backgroundColor: Color(0xff78c1f3), // Updated color
+            content: Text("Customer removed successfully from Firebase ✅"),
+            backgroundColor: Color(0xff78c1f3),
           ),
         );
-        Provider.of<Funs>(context, listen: false).getall();
+        // Refresh the customer list in the provider
+        await Provider.of<Funs>(context, listen: false).getall();
+      }
+
+      // Remove customer from Hive using .where()
+      final box = Hive.box<Customer>('customers');
+
+      final keyToDelete = box.keys.firstWhere(
+        (key) => box.get(key)?.customerId == customerId,
+        orElse: () => null,
+      );
+
+      if (keyToDelete != null) {
+        await box.delete(keyToDelete);
+        // Refresh the customer list in the provider
+        await Provider.of<Funs>(context, listen: false).getFromHive();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Customer removed from Local Storage ✅"),
+            backgroundColor: Color(0xff78c1f3),
+          ),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Customer not found"),
+          const SnackBar(
+            content: Text("Customer not found in Local Storage ❌"),
             backgroundColor: Color(0xffc30010),
           ),
         );
       }
-
-      final box = Hive.box<Customer>('customers');
-      await box.delete(customerId);
-      Provider.of<Funs>(context, listen: false).getFromHive();
-
-      // SegmentedButtonState
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to remove customer: $e"),
+          content: Text("Error: ${e.toString()}"),
           backgroundColor: Color(0xffc30010),
         ),
       );

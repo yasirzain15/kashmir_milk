@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,16 +31,18 @@ class SendMessage {
         return;
       }
 
-      // Parsing numerical values safely
-      double? pricePerLiter =
-          double.tryParse(customer.pricePerLiter?.toString() ?? "0");
-      double? quantityLiters =
-          double.tryParse(customer.milkQuantity?.toString() ?? "0");
+      // Debugging: Print values to check what's happening
+      debugPrint("Price per Liter: ${customer.pricePerLiter}");
+      debugPrint("Milk Quantity: ${customer.milkQuantity}");
 
-      if (pricePerLiter == null ||
-          quantityLiters == null ||
-          pricePerLiter <= 0 ||
-          quantityLiters <= 0) {
+      // Ensure values are valid
+      double pricePerLiter =
+          double.tryParse(customer.pricePerLiter?.toString() ?? "0") ?? 0;
+      double quantityLiters =
+          double.tryParse(customer.milkQuantity?.toString() ?? "0") ?? 0;
+
+      // Validate extracted values
+      if (pricePerLiter <= 0 || quantityLiters <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(
@@ -64,24 +64,9 @@ class SendMessage {
       Uri smsUri =
           Uri.parse("sms:$phoneNumber?body=${Uri.encodeComponent(message)}");
 
-      // Check if device can launch SMS app
-      // if (await canLaunchUrl(smsUri)) {
       await launchUrl(smsUri, mode: LaunchMode.platformDefault);
-      // } else {
-      //   ScaffoldMessenger.of(context).showSnackBar(
-      //     const SnackBar(
-      //         content: Text(
-      //             "Could not open messaging app. Ensure an SMS app is installed."),
-      // duration: Duration(seconds: 1),),
-      //   );
-      // }
     } catch (e) {
-      addSub(4, 6);
       debugPrint("Error sending message: $e");
     }
   }
-}
-
-int addSub(int x, int y) {
-  return x + y;
 }
