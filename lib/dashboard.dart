@@ -146,6 +146,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         const SnackBar(
           content: Text("Logged out successfully!"),
           duration: Duration(seconds: 1),
+          backgroundColor: Color(0xff78c1f3),
         ),
       );
 
@@ -365,7 +366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             child: ListTile(
                               title: Text('Send Message to All'),
                               leading: Icon(
-                                Icons.message_sharp,
+                                Icons.message_outlined,
                                 color: Color(0xff78c1f3),
                               ),
                             ),

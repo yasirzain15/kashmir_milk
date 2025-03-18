@@ -505,6 +505,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
+          errorStyle: TextStyle(color: Color(0xffff2c2c)),
           border: InputBorder.none,
           prefixIcon: Icon(
             icon,

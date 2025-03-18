@@ -11,6 +11,7 @@ class Funs extends ChangeNotifier {
 
   List<String> sectors = []; // List to store sector names
   List<int> sectorCounts = []; // Store the number of customers in each sector
+
   Future<void> getall() async {
     try {
       FirebaseFirestore firestore = FirebaseFirestore.instance;
