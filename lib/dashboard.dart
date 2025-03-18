@@ -314,7 +314,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                       ],
-                      child: const Icon(
+                      child: Icon(
                         Icons.segment_outlined,
                         color: Color(0xff000000),
                       ),
@@ -329,20 +329,49 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                       ),
                     ),
-                    IconButton(
-                      icon: SvgPicture.asset(
-                        'assets/speed.svg',
-                        height: 24,
-                        width: 24,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SeeallScreen(),
+                    PopupMenuButton(
+                      color: Color(0xffffffff),
+                      itemBuilder: (context) => [
+                        PopupMenuItem(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SeeallScreen(),
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              title: Text('Send Reports'),
+                              leading: SvgPicture.asset(
+                                'assets/speed.svg',
+                                height: 24,
+                                width: 24,
+                              ),
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                        PopupMenuItem(
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotifyScreen(),
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              title: Text('Send Message to All'),
+                              leading: Icon(
+                                Icons.message_sharp,
+                                color: Color(0xff78c1f3),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
