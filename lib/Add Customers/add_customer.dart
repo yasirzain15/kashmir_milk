@@ -192,7 +192,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("Customer Added/Updated Successfully!"),
+            content: Text("Customer Added Successfully!"),
             backgroundColor: Color(0xff78c1f3),
           ),
         );

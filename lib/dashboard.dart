@@ -868,12 +868,12 @@ class _CustomerItemState extends State<CustomerItem> {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Customer not found in Local Storage ❌"),
-            backgroundColor: Color(0xffc30010),
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   const SnackBar(
+        //     content: Text("Customer not found in Local Storage ❌"),
+        //     backgroundColor: Color(0xffc30010),
+        //   ),
+        // );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
