@@ -846,18 +846,25 @@ class _CustomerItemState extends State<CustomerItem> {
         );
         // Refresh the customer list in the provider
         await Provider.of<Funs>(context, listen: false).getall();
+        await Provider.of<Funs>(context, listen: false).getFromHive();
       }
 
       // Remove customer from Hive using .where()
+
       final box = Hive.box<Customer>('customers');
 
+      // Find the key using values instead of keys
       final keyToDelete = box.keys.firstWhere(
-        (key) => box.get(key)?.customerId == customerId,
+        (key) {
+          final customer = box.get(key);
+          return customer != null && customer.customerId == customerId;
+        },
         orElse: () => null,
       );
 
       if (keyToDelete != null) {
         await box.delete(keyToDelete);
+
         // Refresh the customer list in the provider
         await Provider.of<Funs>(context, listen: false).getFromHive();
 
@@ -868,17 +875,17 @@ class _CustomerItemState extends State<CustomerItem> {
           ),
         );
       } else {
-        // ScaffoldMessenger.of(context).showSnackBar(
-        //   const SnackBar(
-        //     content: Text("Customer not found in Local Storage ❌"),
-        //     backgroundColor: Color(0xffc30010),
-        //   ),
-        // );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Customer not found in Local Storage ❌"),
+            backgroundColor: Color(0xffc30010),
+          ),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error: ${e.toString()}"),
+          content: Text("Failed to remove customer from Hive: $e"),
           backgroundColor: Color(0xffc30010),
         ),
       );

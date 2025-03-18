@@ -122,12 +122,19 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       final box = Hive.box<Customer>('customers');
 
       final keyToUpdate = box.keys.firstWhere(
-        (key) => box.get(key)?.customerId == customer.customerId,
-        orElse: () => null,
+        (key) {
+          final storedCustomer = box.get(key);
+          return storedCustomer != null &&
+              storedCustomer.customerId == customer.customerId;
+        },
+        orElse: () => null, // If no matching key is found, return null
       );
 
       if (keyToUpdate != null) {
         await box.put(keyToUpdate, customer);
+      } else {
+        // If customer is not found in Hive, add it
+        await box.add(customer);
       }
 
       // Show success message
@@ -137,6 +144,10 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           backgroundColor: Color(0xff78c1f3),
         ),
       );
+
+      // Refresh the provider to update the UI
+      Provider.of<Funs>(context, listen: false).getFromHive();
+      Navigator.pop(context);
     } catch (e) {
       // Handle errors
       ScaffoldMessenger.of(context).showSnackBar(

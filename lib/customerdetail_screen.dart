@@ -86,7 +86,7 @@ class CustomerDetailScreen extends StatelessWidget {
                   SizedBox(height: 12),
 
                   // WhatsApp Section
-                  _infoSection("WhatsApp :", customer.phoneNo ?? 'N/A'),
+                  _infoSection("Whatsapp :", customer.phoneNo ?? 'N/A'),
 
                   Spacer(),
 

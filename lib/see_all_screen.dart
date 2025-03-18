@@ -1,9 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/send_mesage.dart';
@@ -20,20 +20,46 @@ class _SeeallScreenState extends State<SeeallScreen> {
   List<Customer> customers = [];
   String _searchQuery = ""; // Variable to store the search query
 
-  // Fetch all customers from Firestore
-  Future<void> getall() async {
-    try {
-      FirebaseFirestore firestore = FirebaseFirestore.instance;
-      CollectionReference userCollection = firestore.collection('customer');
-      final response = await userCollection.get();
+  @override
+  void initState() {
+    super.initState();
+    _fetchCustomers();
+  }
 
-      setState(() {
-        customers = response.docs.map((customer) {
-          return customer.data() as Customer;
-        }).toList();
-      });
+  // Fetch all customers from Firestore and Hive
+  Future<void> _fetchCustomers() async {
+    List<Customer> hiveCustomers = _getCustomersFromHive();
+    List<Customer> firestoreCustomers = await _getCustomersFromFirestore();
+
+    setState(() {
+      customers = [...hiveCustomers, ...firestoreCustomers];
+    });
+  }
+
+  // Fetch customers stored in Hive
+  List<Customer> _getCustomersFromHive() {
+    final box = Hive.box<Customer>('customers');
+    return box.values.toList();
+  }
+
+  // Fetch customers from Firestore
+  Future<List<Customer>> _getCustomersFromFirestore() async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null) return [];
+
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('customer')
+          .get();
+
+      return snapshot.docs
+          .map((doc) => Customer.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
     } catch (e) {
-      debugPrint("Error fetching data: $e");
+      debugPrint("Error fetching Firestore data: $e");
+      return [];
     }
   }
 
@@ -53,72 +79,54 @@ class _SeeallScreenState extends State<SeeallScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    final provider = Provider.of<Funs>(context, listen: false);
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      await getall();
-      await provider.getall();
-      await provider.getFromHive();
-
-      setState(() {
-        customers.addAll(provider.customers);
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Filter customers based on the search query
     final filteredCustomers = _filterCustomers(customers, _searchQuery);
 
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextFormField(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Search Customers',
-                    hintStyle: GoogleFonts.poppins(
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        color: Color(0xffa6a6a6),
-                      ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextFormField(
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Search Customers',
+                  hintStyle: GoogleFonts.poppins(
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: Color(0xffa6a6a6),
                     ),
-                    filled: true, // Enable background fill
-                    fillColor: Color(0x2bc5e0f2), // Set background color
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value; // Update the search query
-                    });
-                  },
+                  filled: true, // Enable background fill
+                  fillColor: Color(0x2bc5e0f2), // Set background color
                 ),
+                onChanged: (value) {
+                  setState(() {
+                    _searchQuery = value;
+                  });
+                },
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: filteredCustomers.isEmpty
-                      ? const Center(
-                          child: CircularProgressIndicator(
-                          color: Color(0xff78c1f3),
-                        ))
-                      : ListView.builder(
-                          itemCount: filteredCustomers.length,
-                          itemBuilder: (context, index) {
-                            return buildCustomerItem(filteredCustomers[index]);
-                          },
-                        ),
-                ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: filteredCustomers.isEmpty
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                        color: Color(0xff78c1f3),
+                      ))
+                    : ListView.builder(
+                        itemCount: filteredCustomers.length,
+                        itemBuilder: (context, index) {
+                          return buildCustomerItem(filteredCustomers[index]);
+                        },
+                      ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -128,19 +136,21 @@ class _SeeallScreenState extends State<SeeallScreen> {
   Widget buildCustomerItem(Customer customer) {
     String name = customer.name ?? "Unknown";
     String city = customer.city ?? "Unknown City";
-    String address = [customer.houseNo, customer.streetNo, customer.streetNo]
+    String address = [customer.houseNo, customer.streetNo, customer.sector]
         .where((element) => element != null && element.toString().isNotEmpty)
         .join(", ");
     String phone = customer.phoneNo?.toString() ?? "N/A";
-    // String pricePerLiter = customer['Price/Liter']?.toString() ?? "N/A";
 
     return GestureDetector(
       onTap: () {
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    CustomerDetailScreen(customer: customer)));
+          context,
+          MaterialPageRoute(
+            builder: (context) => CustomerDetailScreen(
+              customer: customer,
+            ),
+          ),
+        );
       },
       child: Card(
         color: const Color(0xffffffff),
@@ -227,11 +237,12 @@ class _SeeallScreenState extends State<SeeallScreen> {
                             child: Text(
                               'Send Monthly Report',
                               style: GoogleFonts.poppins(
-                                  textStyle: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xffffffff),
-                              )),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xffffffff),
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -239,21 +250,6 @@ class _SeeallScreenState extends State<SeeallScreen> {
                     ),
                   ],
                 ),
-              ),
-              PopupMenuButton<int>(
-                color: const Color(0xffffffff),
-                onSelected: (value) {
-                  if (value == 1) {
-                    SendMessage().sendMessage(customer, context);
-                  }
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem<int>(
-                    value: 1,
-                    child: Text('Send Message'),
-                  ),
-                ],
-                child: const Icon(Icons.more_horiz),
               ),
             ],
           ),
