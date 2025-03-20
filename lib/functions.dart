@@ -14,6 +14,8 @@ class Funs extends ChangeNotifier {
 
   Future<void> getall() async {
     try {
+      customers.clear();
+      filteredCustomers.clear();
       FirebaseFirestore firestore = FirebaseFirestore.instance;
       CollectionReference userCollection = firestore
           .collection('users')

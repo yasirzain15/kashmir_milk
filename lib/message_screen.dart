@@ -163,7 +163,10 @@ class _NotifyScreenState extends State<NotifyScreen> {
           children: [
             Expanded(
               child: isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? Center(
+                      child: CircularProgressIndicator(
+                      color: Color(0xff78c1f3),
+                    ))
                   : ListView.builder(
                       itemCount: users.length,
                       itemBuilder: (context, index) {

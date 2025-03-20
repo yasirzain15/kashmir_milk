@@ -51,9 +51,9 @@ class Customer {
       sector: json['Sector']?.toString(),
       streetNo: json['Street No']?.toString(),
       houseNo: json['House No']?.toString(),
-      phoneNo: json['Phone Number']?.toString(),
+      phoneNo: json['Phone Number'] ?? json["Phone No"],
       milkQuantity: json['Milk Quantity']?.toString(),
-      pricePerLiter: (json['Price/Liter'] as num?)?.toDouble(),
+      pricePerLiter: double.tryParse(json['Price/Liter']?.toString() ?? '0'),
       customerId: json['customer_id']?.toString(),
     );
   }

@@ -14,7 +14,15 @@ class BillingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Billing")),
+      backgroundColor: Color(0xffffffff),
+      appBar: AppBar(
+          backgroundColor: Color(0xff78c1f3),
+          title: Text(
+            "Billing",
+            style: TextStyle(
+              color: Color(0xffffffff),
+            ),
+          )),
       body: Consumer<Funs>(
         builder: (context, funs, child) {
           return ListView.builder(
@@ -23,6 +31,7 @@ class BillingScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               Customer customer = funs.customers[index];
               return Card(
+                color: Color(0xffffffff),
                 elevation: 3,
                 margin: EdgeInsets.only(bottom: 10),
                 child: ListTile(
@@ -134,9 +143,13 @@ class BillingScreen extends StatelessWidget {
             pw.Text("Milk Quantity: ${customer.milkQuantity} Liters"),
             pw.Text("Price per Liter: Rs. ${customer.pricePerLiter}"),
             pw.SizedBox(height: 10),
-            pw.Text("Total Bill: Rs. ${totalBill.toStringAsFixed(2)}",
-                style:
-                    pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+            pw.Text(
+              "Total Bill: Rs. ${totalBill.toStringAsFixed(2)}",
+              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+            ),
+            pw.SizedBox(height: 20),
+            pw.Text(
+                'Dear ${customer.name} Kindly Pay Your Bill on Time \nThank You \nEasyPaisa Number:03143130462\n ${DateTime.now()}'),
           ],
         ),
       ),

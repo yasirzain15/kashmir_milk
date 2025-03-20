@@ -135,6 +135,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       } else {
         // If customer is not found in Hive, add it
         await box.add(customer);
+        final provider = Provider.of<Funs>(context, listen: false);
+        provider.getall();
       }
 
       // Show success message

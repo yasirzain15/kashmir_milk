@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 
 class CsvExcelUploader extends StatefulWidget {
   const CsvExcelUploader({super.key});
@@ -18,7 +19,7 @@ class CsvExcelUploader extends StatefulWidget {
 }
 
 class _CsvExcelUploaderState extends State<CsvExcelUploader> {
-  List<Map<String, dynamic>> fileData = []; // Ensure this holds valid data
+  List<Customer> fileData = []; // Ensure this holds valid data
   String? fileName;
   bool isUploading = false;
   int uploadProgress = 0;
@@ -63,14 +64,14 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       List<String> headers =
           csvTable.first.map((e) => e.toString().trim()).toList();
 
-      List<Map<String, dynamic>> dataList = csvTable.skip(1).map((row) {
+      List<Customer> dataList = csvTable.skip(1).map((row) {
         var map = Map<String, dynamic>.fromIterables(headers, row.map((value) {
           // Convert numbers to string if needed
           return (value is double)
               ? value.toInt().toString()
               : value.toString();
         }));
-        return map;
+        return Customer.fromJson(map);
       }).toList();
 
       setState(() {
@@ -128,7 +129,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
       if (hasInternet) {
         for (var row in fileData) {
           final docref = userCollection.doc();
-          await docref.set({"customer_id": docref.id, ...row});
+          await docref.set({...row.toJson(), "customer_id": docref.id});
           processedRows++;
           setState(() =>
               uploadProgress = ((processedRows / totalRows) * 100).round());
@@ -144,7 +145,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
         var box = Hive.box<Map>('CSV_customers'); // Use proper type
 
         for (var row in fileData) {
-          await box.add(row); // Directly store the map
+          await box.add(row.toJson()); // Directly store the map
 
           processedRows++;
           print("Row saved: $row");
