@@ -14,6 +14,7 @@ import 'package:kashmeer_milk/Add customers/add_customer.dart';
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
+import 'package:kashmeer_milk/billing_screen.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:kashmeer_milk/message_screen.dart';
 import 'package:kashmeer_milk/see_all_screen.dart';
@@ -52,8 +53,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Future.delayed(const Duration(milliseconds: 100), () {
       provider.getall();
       provider.getFromHive();
-      Provider.of<Funs>(context, listen: false).fetchSectors();
+
       loadCustomerData();
+      fetchTotalCustomers();
       fetchUniqueSectors();
     });
     updateGreeting();
@@ -261,24 +263,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         ),
                         PopupMenuItem(
                           value: 1,
-                          child: ListTile(
-                            title: Text(
-                              'Reports',
-                              style: GoogleFonts.poppins(
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                  color: Color(0xff12121f),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => BillingScreen()));
+                            },
+                            child: ListTile(
+                              title: Text(
+                                'Reports',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xff12121f),
+                                  ),
                                 ),
                               ),
-                            ),
-                            subtitle: Text(
-                              'Generate and Share reports',
-                              style: GoogleFonts.poppins(
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 10,
-                                  color: Color(0xffafafbd),
+                              subtitle: Text(
+                                'Generate and Share reports',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    color: Color(0xffafafbd),
+                                  ),
                                 ),
                               ),
                             ),

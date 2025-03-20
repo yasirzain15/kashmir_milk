@@ -34,6 +34,9 @@ dependencies:
   fluttertoast: ^8.2.12
   carousel_slider: ^5.0.0
   flutter_svg: ^2.0.17
+  share_plus: ^10.1.4
+  pdf: ^3.11.3
+  printing: ^5.14.2
   
   
   

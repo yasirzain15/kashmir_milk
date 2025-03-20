@@ -76,29 +76,4 @@ class Funs extends ChangeNotifier {
     customers.remove(customer);
     notifyListeners();
   }
-
-  Future<void> fetchSectors() async {
-    try {
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc('your_user_id') // Replace with actual user ID
-          .collection('customer')
-          .get();
-
-      // Create a Map to count occurrences of each sector
-      Map<String, int> sectorMap = {};
-
-      for (var doc in snapshot.docs) {
-        String sector = doc['Sector'] as String;
-        sectorMap[sector] = (sectorMap[sector] ?? 0) + 1;
-      }
-
-      sectors = sectorMap.keys.toList(); // Get unique sector names
-      sectorCounts = sectorMap.values.toList(); // Get counts of each sector
-
-      notifyListeners();
-    } catch (e) {
-      print("Error fetching sectors: $e");
-    }
-  }
 }
