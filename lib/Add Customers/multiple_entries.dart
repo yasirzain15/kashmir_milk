@@ -156,20 +156,18 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
           }
         }
 
-        print("Stored Data: ${box.values.toList()}"); // Debugging
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Saved to Local Storage ❌ No Internet"),
-            backgroundColor: Colors.yellow,
+            backgroundColor: Color(0xff78c1f3),
           ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Error during upload ❌ $e"),
-          backgroundColor: Colors.red,
-        ),
+            content: Text("Error during upload ❌ $e"),
+            backgroundColor: Color(0xffff2c2c)),
       );
     } finally {
       setState(() => isUploading = false);

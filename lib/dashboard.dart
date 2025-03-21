@@ -4,12 +4,15 @@ import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:kashmeer_milk/Add customers/add_customer.dart';
 import 'package:kashmeer_milk/Add Customers/multiple_entries.dart';
 import 'package:kashmeer_milk/Login/login_screen.dart';
@@ -36,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
 
   final TextEditingController _customerController = TextEditingController();
+
   final List<String> _imageList = [
     'assets/image.png',
     'assets/image.png',
@@ -50,6 +54,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
 
     final provider = Provider.of<Funs>(context, listen: false);
+
     Future.delayed(const Duration(milliseconds: 100), () {
       provider.getall();
       provider.getFromHive();
@@ -868,27 +873,33 @@ class _CustomerItemState extends State<CustomerItem> {
       String customerId, BuildContext context) async {
     try {
       // Remove customer from Firebase
-      var docRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .collection('customer')
-          .doc(customerId);
+      bool? isConnected;
 
-      var doc = await docRef.get();
+      isConnected = await Provider.of<Funs>(context, listen: false)
+          .checkInternet(context);
 
-      if (doc.exists) {
-        await docRef.delete();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Customer removed successfully from Firebase ✅"),
-            backgroundColor: Color(0xff78c1f3),
-          ),
-        );
-        // Refresh the customer list in the provider
-        await Provider.of<Funs>(context, listen: false).getall();
-        await Provider.of<Funs>(context, listen: false).getFromHive();
+      if (isConnected) {
+        var docRef = FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser?.uid)
+            .collection('customer')
+            .doc(customerId);
+
+        var doc = await docRef.get();
+
+        if (doc.exists) {
+          await docRef.delete();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Customer removed successfully "),
+              backgroundColor: Color(0xff78c1f3),
+            ),
+          );
+          // Refresh the customer list in the provider
+          await Provider.of<Funs>(context, listen: false).getall();
+          await Provider.of<Funs>(context, listen: false).getFromHive();
+        }
       }
-
       // Remove customer from Hive using .where()
 
       final box = Hive.box<Customer>('customers');
@@ -896,8 +907,7 @@ class _CustomerItemState extends State<CustomerItem> {
       // Find the key using values instead of keys
       final keyToDelete = box.keys.firstWhere(
         (key) {
-          final customer = box.get(key);
-          return customer != null && customer.customerId == customerId;
+          return key == customerId;
         },
         orElse: () => null,
       );
@@ -907,6 +917,7 @@ class _CustomerItemState extends State<CustomerItem> {
 
         // Refresh the customer list in the provider
         await Provider.of<Funs>(context, listen: false).getFromHive();
+        await Provider.of<Funs>(context, listen: false).getall();
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

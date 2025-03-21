@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:http/http.dart' as http;
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -38,6 +40,48 @@ class Funs extends ChangeNotifier {
       // customers.clear(); // Prevent duplicates by clearing old data
     } catch (e) {
       debugPrint("Error fetching data: $e");
+    }
+  }
+
+  Future<bool> checkInternet(BuildContext context) async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult
+        .any((element) => element == ConnectivityResult.none)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Customer removed successfully"),
+          duration: Duration(seconds: 1),
+          backgroundColor: Color(0xff78c1f3),
+        ),
+      );
+      return false;
+    }
+    try {
+      final response = await http
+          .get(Uri.parse('https://www.google.com'))
+          .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
+
+      if (response.statusCode == 200) {
+        return true; // Internet is working
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("No Internet: Failed to reach server"),
+            duration: Duration(seconds: 1),
+            backgroundColor: Color(0xff78c1f3),
+          ),
+        );
+        return false;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("No Internet: Saved Offline !!"),
+          duration: Duration(seconds: 2),
+          backgroundColor: Color(0xffc30010),
+        ),
+      );
+      return false;
     }
   }
 

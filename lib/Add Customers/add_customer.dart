@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously, unrelated_type_equality_checks, deprecated_member_use
-
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +62,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
     var connectivityResult = await Connectivity().checkConnectivity();
 
     // Check if the device is connected to WiFi or Mobile Data
-    if (connectivityResult == ConnectivityResult.none) {
+    if (connectivityResult
+        .any((element) => element == ConnectivityResult.none)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("No Internet Connection"),
@@ -117,15 +116,15 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
           .collection('customer')
           .doc(customer.customerId)
           .set(customer.toJson());
+      await Provider.of<Funs>(context, listen: false).getall();
+      await Provider.of<Funs>(context, listen: false).getFromHive();
 
       // Update the customer data in Hive
       final box = Hive.box<Customer>('customers');
 
       final keyToUpdate = box.keys.firstWhere(
         (key) {
-          final storedCustomer = box.get(key);
-          return storedCustomer != null &&
-              storedCustomer.customerId == customer.customerId;
+          return key == customer.customerId;
         },
         orElse: () => null, // If no matching key is found, return null
       );
@@ -137,6 +136,8 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         await box.add(customer);
         final provider = Provider.of<Funs>(context, listen: false);
         provider.getall();
+
+        await Provider.of<Funs>(context, listen: false).getFromHive();
       }
 
       // Show success message
@@ -224,7 +225,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
       }
     } else {
       var box = Hive.box<Customer>('customers');
-      await box.add(customer);
+      await box.put(customerId, customer);
 
       // Refresh the customer list in the provider
       await Provider.of<Funs>(context, listen: false).getFromHive();

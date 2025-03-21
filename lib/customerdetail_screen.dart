@@ -1,26 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
+import 'package:kashmeer_milk/Models/customer_model.dart';
 
 class CustomerDetailScreen extends StatelessWidget {
   final Customer? customer;
 
   CustomerDetailScreen({required this.customer});
 
+  Future<Customer?> _fetchCustomerData() async {
+    var box = await Hive.openBox<Customer>('customers');
+    Customer? localCustomer = box.get(customer!.customerId);
+
+    if (localCustomer != null) {
+      return localCustomer;
+    }
+
+    DocumentSnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('customer')
+        .doc(customer!.customerId)
+        .get();
+
+    if (snapshot.exists) {
+      Customer fetchedCustomer =
+          Customer.fromJson(snapshot.data() as Map<String, dynamic>);
+      await box.put(fetchedCustomer.customerId, fetchedCustomer);
+      return fetchedCustomer;
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Color(0xffffffff),
-        body: FutureBuilder<DocumentSnapshot>(
-          future: FirebaseFirestore.instance
-              .collection('users')
-              .doc(FirebaseAuth.instance.currentUser!.uid)
-              .collection('customer')
-              .doc(customer!.customerId)
-              .get(),
+        body: FutureBuilder<Customer?>(
+          future: _fetchCustomerData(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -29,19 +50,17 @@ class CustomerDetailScreen extends StatelessWidget {
               ));
             }
 
-            if (!snapshot.hasData || !snapshot.data!.exists) {
+            if (!snapshot.hasData) {
               return Center(child: Text("Customer data not found"));
             }
 
-            Customer customer = Customer.fromJson(
-                snapshot.data!.data() as Map<String, dynamic>);
+            Customer customer = snapshot.data!;
 
             return Padding(
               padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Centering Profile Image, Name, and Sector
                   Center(
                     child: Column(
                       children: [
@@ -71,26 +90,14 @@ class CustomerDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 24),
-
-                  // Address Section
                   _infoSection("Address :",
-                      " House No, ${customer.houseNo ?? 'N/A'}, Street No ${customer.streetNo ?? 'N/A'}, Sector ${customer.sector ?? 'N/A'}"),
-
+                      "House No, ${customer.houseNo ?? 'N/A'}, Street No ${customer.streetNo ?? 'N/A'}, Sector ${customer.sector ?? 'N/A'}"),
                   SizedBox(height: 12),
-
-                  // Call/Message Section
                   _infoSection("Call/Message :", customer.phoneNo ?? 'N/A'),
-
                   SizedBox(height: 12),
-
-                  // WhatsApp Section
                   _infoSection("Whatsapp :", customer.phoneNo ?? 'N/A'),
-
                   Spacer(),
-
-                  // Footer Text (Centered)
                   Center(
                     child: Column(
                       children: [
@@ -126,7 +133,6 @@ class CustomerDetailScreen extends StatelessWidget {
     );
   }
 
-  // Custom Function for Info Sections (Left-Aligned)
   Widget _infoSection(String title, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

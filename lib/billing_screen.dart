@@ -11,6 +11,19 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 class BillingScreen extends StatelessWidget {
+  String _formatHour(int hour) {
+    int formattedHour = hour % 12 == 0 ? 12 : hour % 12;
+    return _twoDigits(formattedHour);
+  }
+
+  String _getAmPm(int hour) {
+    return hour >= 12 ? "PM" : "AM";
+  }
+
+  String _twoDigits(int n) {
+    return n.toString().padLeft(2, '0'); // Ensures two-digit formatting
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,7 +162,12 @@ class BillingScreen extends StatelessWidget {
             ),
             pw.SizedBox(height: 20),
             pw.Text(
-                'Dear ${customer.name} Kindly Pay Your Bill on Time \nThank You \nEasyPaisa Number:03143130462\n ${DateTime.now()}'),
+                'Dear ${customer.name} Kindly Pay Your Bill on Time \nThank You \nEasyPaisa Number:03143130462'),
+            pw.SizedBox(height: 60),
+            pw.Text(
+              "${_formatHour(DateTime.now().hour)}:${_twoDigits(DateTime.now().minute)} ${_getAmPm(DateTime.now().hour)}\n"
+              "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+            ),
           ],
         ),
       ),
