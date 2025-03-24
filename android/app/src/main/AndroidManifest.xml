@@ -5,8 +5,8 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO"/>
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29"/>
+
+    <!-- ✅ SMS Permission -->
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <queries>
@@ -17,12 +17,15 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <intent>
+            <action android:name="android.intent.action.SENDTO"/>
+            <data android:scheme="sms"/>
+        </intent>
     </queries>
 
     <application
         android:label="kashmeer_milk"
         android:icon="@mipmap/ic_launcher">
-
 
         <!-- ✅ Disable Impeller to fix black screen issue -->
         <meta-data android:name="flutter.renderer" android:value="skia"/>
@@ -47,6 +50,14 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!-- ✅ Ensuring SMS intent works properly -->
+            <intent-filter>
+                <action android:name="android.intent.action.SENDTO"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="sms"/>
+            </intent-filter>
+
         </activity>
 
     </application>

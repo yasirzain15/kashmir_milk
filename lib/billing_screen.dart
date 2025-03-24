@@ -2,13 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kashmeer_milk/functions.dart';
 import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:pdf/pdf.dart';
-import 'package:printing/printing.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BillingScreen extends StatefulWidget {
   @override
@@ -21,7 +16,7 @@ class _BillingScreenState extends State<BillingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffffffff),
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Color(0xff78c1f3),
         title: Text("Billing", style: TextStyle(color: Colors.white)),
@@ -131,7 +126,7 @@ class _BillingScreenState extends State<BillingScreen> {
                         child: ElevatedButton(
                           style: ButtonStyle(
                             backgroundColor:
-                                MaterialStateProperty.all(Color(0xffff2c2c)),
+                                MaterialStateProperty.all(Colors.red),
                           ),
                           onPressed: () => Navigator.pop(context),
                           child: Text("Close",
@@ -145,9 +140,9 @@ class _BillingScreenState extends State<BillingScreen> {
                             backgroundColor:
                                 MaterialStateProperty.all(Color(0xff78c1f3)),
                           ),
-                          onPressed: () => _generateAndSharePDF(
+                          onPressed: () => _generateAndSendSMS(
                               customer, deliveredDays, skippedDays, totalBill),
-                          child: Text("Share Report",
+                          child: Text("Send SMS",
                               style: TextStyle(color: Colors.white)),
                         ),
                       ),
@@ -220,60 +215,43 @@ class _BillingScreenState extends State<BillingScreen> {
 
   String getFormattedTime() {
     DateTime now = DateTime.now();
-    int hour =
-        now.hour % 12 == 0 ? 12 : now.hour % 12; // Convert 0 to 12-hour format
+    int hour = now.hour % 12 == 0 ? 12 : now.hour % 12;
     int minute = now.minute;
     String amPm = now.hour >= 12 ? "PM" : "AM";
 
     return "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')} $amPm";
   }
 
-  Future<void> _generateAndSharePDF(Customer customer, int deliveredDays,
+  Future<void> _generateAndSendSMS(Customer customer, int deliveredDays,
       int skippedDays, double totalBill) async {
-    final pdf = pw.Document();
+    String message = """
+Billing Report:
+Customer: ${customer.name}
+Milk Quantity: ${customer.milkQuantity} Liters
+Price per Liter: Rs. ${customer.pricePerLiter}
 
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
-          children: [
-            pw.Text("Billing Report",
-                style:
-                    pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 10),
-            pw.Text("Customer: ${customer.name}"),
-            pw.Text("Milk Quantity: ${customer.milkQuantity} Liters"),
-            pw.Text("Price per Liter: Rs. ${customer.pricePerLiter}"),
-            pw.SizedBox(height: 10),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
-              children: [
-                pw.Text("Delivered Days: $deliveredDays"),
-                pw.SizedBox(width: 10),
-                pw.Text("Skipped Days: $skippedDays"),
-              ],
-            ),
-            pw.SizedBox(height: 10),
-            pw.Text("Total Bill: Rs. ${totalBill.toStringAsFixed(2)}",
-                style:
-                    pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-            pw.SizedBox(height: 50),
-            pw.Text(
-                "Dear ${customer.name}, Kindly Pay Your Bill on Time. Thank You!!!"),
-            pw.SizedBox(height: 10),
-            pw.Text('EasyPaisa Number: 03143130462'),
-            pw.SizedBox(height: 35),
-            pw.Text("Generated on: ${getFormattedTime()}"),
-          ],
-        ),
-      ),
-    );
+Delivered Days: $deliveredDays
+Skipped Days: $skippedDays
 
-    final output = await getTemporaryDirectory();
-    final file = File("${output.path}/bill_report.pdf");
-    await file.writeAsBytes(await pdf.save());
+Total Bill: Rs. ${totalBill.toStringAsFixed(2)}
 
-    Share.shareXFiles([XFile(file.path)],
-        text: "Billing Report for ${customer.name}");
+Kindly Pay Your Bill on Time. Thank You!
+EasyPaisa Number: 03143130462
+Generated on: ${getFormattedTime()}
+  """;
+
+    String phoneNumber = customer.phoneNo ?? "";
+
+    if (phoneNumber.isNotEmpty) {
+      String smsUrl = "sms:$phoneNumber?body=${Uri.encodeComponent(message)}";
+
+      if (await canLaunchUrl(Uri.parse(smsUrl))) {
+        await launchUrl(Uri.parse(smsUrl));
+      } else {
+        print("Could not launch SMS app");
+      }
+    } else {
+      print("Customer phone number is missing!");
+    }
   }
 }
