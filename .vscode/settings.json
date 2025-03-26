@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/kashmeer_milk/linux"
+    "cmake.sourceDirectory": "D:/kashmeer_milk/linux",
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

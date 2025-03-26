@@ -2,14 +2,26 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        jcenter() // Legacy support (optional)
     }
 }
 
 rootProject.buildDir = "../build"
+
+buildscript {
+    ext.kotlin_version = '1.8.10' // Latest Kotlin version
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.3.0' // Updated Gradle plugin version
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
     project.evaluationDependsOn(":app")
 }
 
