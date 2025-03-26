@@ -24,49 +24,31 @@ class _BillingScreenState extends State<BillingScreen> {
       ),
       body: Consumer<Funs>(
         builder: (context, funs, child) {
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  padding: EdgeInsets.all(16.0),
-                  itemCount: funs.customers.length,
-                  itemBuilder: (context, index) {
-                    Customer customer = funs.customers[index];
-                    return Card(
-                      color: Colors.white,
-                      elevation: 3,
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: ListTile(
-                        title: Text(customer.name ?? 'Unknown',
-                            style: TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text("Milk: ${customer.milkQuantity} Liters"),
-                        trailing: ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor:
-                                MaterialStateProperty.all(Color(0xff78c1f3)),
-                          ),
-                          onPressed: () => _showBillSheet(context, customer),
-                          child: Text("Calculate Bill",
-                              style: TextStyle(color: Colors.white)),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all(Colors.redAccent),
+          return ListView.builder(
+            padding: EdgeInsets.all(16.0),
+            itemCount: funs.customers.length,
+            itemBuilder: (context, index) {
+              Customer customer = funs.customers[index];
+              return Card(
+                color: Colors.white,
+                elevation: 3,
+                margin: EdgeInsets.only(bottom: 10),
+                child: ListTile(
+                  title: Text(customer.name ?? 'Unknown',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text("Milk: ${customer.milkQuantity} Liters"),
+                  trailing: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Color(0xff78c1f3)),
+                    ),
+                    onPressed: () => _showBillSheet(context, customer),
+                    child: Text("Calculate Bill",
+                        style: TextStyle(color: Colors.white)),
                   ),
-                  onPressed: () => _sendBillingDetailsToAll(),
-                  child: Text("Send to All",
-                      style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
-              ),
-            ],
+              );
+            },
           );
         },
       ),
@@ -81,11 +63,17 @@ class _BillingScreenState extends State<BillingScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
+      isScrollControlled: true,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
+            int deliveredDays = 30 - skippedDays.length;
+            double totalBill = deliveredDays *
+                (double.tryParse(customer.milkQuantity ?? '0') ?? 0) *
+                (customer.pricePerLiter ?? 0);
+
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,9 +93,7 @@ class _BillingScreenState extends State<BillingScreen> {
                     child: Text("Select Skipped Days"),
                   ),
                   SizedBox(height: 10),
-                  Text(
-                    "Total Bill: Rs. ${(30 - skippedDays.length) * (double.tryParse(customer.milkQuantity ?? '0') ?? 0) * (customer.pricePerLiter ?? 0)}",
-                  ),
+                  Text("Total Bill: Rs. ${totalBill.toStringAsFixed(2)}"),
                   SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,9 +116,8 @@ class _BillingScreenState extends State<BillingScreen> {
                             backgroundColor:
                                 MaterialStateProperty.all(Colors.green),
                           ),
-                          onPressed: () {
-                            _sendSMS(customer);
-                          },
+                          onPressed: () =>
+                              _sendSMS(customer, totalBill, skippedDays.length),
                           child: Text("Send SMS",
                               style: TextStyle(color: Colors.white)),
                         ),
@@ -149,7 +134,7 @@ class _BillingScreenState extends State<BillingScreen> {
   }
 
   void _selectSkippedDays(
-      BuildContext context, Customer customer, Function setBottomSheetState) {
+      BuildContext context, Customer customer, Function setState) {
     List<DateTime> selectedDays =
         List.from(skippedDaysMap[customer.name] ?? []);
 
@@ -181,7 +166,7 @@ class _BillingScreenState extends State<BillingScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    setBottomSheetState(() {
+                    setState(() {
                       skippedDaysMap[customer.name ?? ""] = selectedDays;
                     });
                     Navigator.pop(context);
@@ -196,40 +181,20 @@ class _BillingScreenState extends State<BillingScreen> {
     );
   }
 
-  Future<void> _sendBillingDetailsToAll() async {
-    var funs = Provider.of<Funs>(context, listen: false);
-    for (Customer customer in funs.customers) {
-      _sendSMS(customer);
-      await Future.delayed(Duration(seconds: 4));
-    }
-  }
-
-  void _sendSMS(Customer customer) async {
+  Future<void> _sendSMS(
+      Customer customer, double totalBill, int skippedDays) async {
     if (await Permission.sms.request().isGranted) {
-      int skippedDays = skippedDaysMap[customer.name]?.length ?? 0;
-      int deliveredDays = 30 - skippedDays;
-      double totalBill = deliveredDays *
-          (double.tryParse(customer.milkQuantity ?? '0') ?? 0) *
-          (customer.pricePerLiter ?? 0);
-
       String message = """
 Billing Report:
 Customer: ${customer.name}
-Delivered Days: $deliveredDays
 Skipped Days: $skippedDays
 Total Bill: Rs. ${totalBill.toStringAsFixed(2)}
 Pay Your Bill. Thank You!
 """;
-
       try {
-        await sendSMS(message: message, recipients: [customer.phoneNo ?? ""])
-            .then((result) {
-          print("SMS Sent: $result");
-        }).catchError((error) {
-          print("Failed to send SMS: $error");
-        });
+        await sendSMS(message: message, recipients: [customer.phoneNo ?? ""]);
       } catch (e) {
-        print("Error: $e");
+        print("SMS Sending Failed: $e");
       }
     } else {
       print("SMS Permission Denied!");
