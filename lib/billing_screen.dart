@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flutter_sms/flutter_sms.dart';
-import 'dart:async';
+import 'package:permission_handler/permission_handler.dart';
 
 class BillingScreen extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class BillingScreen extends StatefulWidget {
 }
 
 class _BillingScreenState extends State<BillingScreen> {
-  Map<String, int> skippedDaysMap = {};
+  Map<String, List<DateTime>> skippedDaysMap = {};
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class _BillingScreenState extends State<BillingScreen> {
                     backgroundColor:
                         MaterialStateProperty.all(Colors.redAccent),
                   ),
-                  onPressed: () => _showBillingDetailsForAll(context),
+                  onPressed: () => _sendBillingDetailsToAll(),
                   child: Text("Send to All",
                       style: TextStyle(color: Colors.white, fontSize: 16)),
                 ),
@@ -74,114 +74,165 @@ class _BillingScreenState extends State<BillingScreen> {
   }
 
   void _showBillSheet(BuildContext context, Customer customer) {
+    List<DateTime> skippedDays = skippedDaysMap[customer.name] ?? [];
+
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
       ),
       builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Billing Details",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              Text("Customer: ${customer.name}"),
-              Text("Milk Quantity: ${customer.milkQuantity} Liters"),
-              Text("Price per Liter: Rs. ${customer.pricePerLiter}"),
-              SizedBox(height: 10),
-              Text(
-                  "Total Bill: Rs. ${(30 - (skippedDaysMap[customer.name] ?? 0)) * (double.tryParse(customer.milkQuantity ?? '0') ?? 0) * (customer.pricePerLiter ?? 0)}"),
-              SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(Colors.red),
+                  Text("Billing Details",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Text("Customer: ${customer.name}"),
+                  Text("Milk Quantity: ${customer.milkQuantity} Liters"),
+                  Text("Price per Liter: Rs. ${customer.pricePerLiter}"),
+                  SizedBox(height: 10),
+                  Text("Skipped Days: ${skippedDays.length}"),
+                  ElevatedButton(
+                    onPressed: () =>
+                        _selectSkippedDays(context, customer, setState),
+                    child: Text("Select Skipped Days"),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    "Total Bill: Rs. ${(30 - skippedDays.length) * (double.tryParse(customer.milkQuantity ?? '0') ?? 0) * (customer.pricePerLiter ?? 0)}",
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.red),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          child: Text("Close",
+                              style: TextStyle(color: Colors.white)),
+                        ),
                       ),
-                      onPressed: () => Navigator.pop(context),
-                      child:
-                          Text("Close", style: TextStyle(color: Colors.white)),
-                    ),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ButtonStyle(
+                            backgroundColor:
+                                MaterialStateProperty.all(Colors.green),
+                          ),
+                          onPressed: () {
+                            _sendSMS(customer);
+                          },
+                          child: Text("Send SMS",
+                              style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
   }
 
-  void _showBillingDetailsForAll(BuildContext context) {
+  void _selectSkippedDays(
+      BuildContext context, Customer customer, Function setBottomSheetState) {
+    List<DateTime> selectedDays =
+        List.from(skippedDaysMap[customer.name] ?? []);
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Billing Details for All"),
-          content: Text("Select skipped days, then send SMS to all customers."),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _sendSMSToAllCustomers();
-              },
-              child: Text("Send SMS"),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text("Select Skipped Days"),
+              content: SizedBox(
+                height: 300,
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2024, 1, 1),
+                  lastDay: DateTime.utc(2025, 12, 31),
+                  focusedDay: DateTime.now(),
+                  selectedDayPredicate: (day) => selectedDays.contains(day),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setDialogState(() {
+                      if (selectedDays.contains(selectedDay)) {
+                        selectedDays.remove(selectedDay);
+                      } else {
+                        selectedDays.add(selectedDay);
+                      }
+                    });
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    setBottomSheetState(() {
+                      skippedDaysMap[customer.name ?? ""] = selectedDays;
+                    });
+                    Navigator.pop(context);
+                  },
+                  child: Text("Done"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  Future<void> _sendSMSToAllCustomers() async {
+  Future<void> _sendBillingDetailsToAll() async {
     var funs = Provider.of<Funs>(context, listen: false);
-    for (int i = 0; i < funs.customers.length; i++) {
-      Customer customer = funs.customers[i];
-      int skippedDays = skippedDaysMap[customer.name] ?? 0;
+    for (Customer customer in funs.customers) {
+      _sendSMS(customer);
+      await Future.delayed(Duration(seconds: 4));
+    }
+  }
+
+  void _sendSMS(Customer customer) async {
+    if (await Permission.sms.request().isGranted) {
+      int skippedDays = skippedDaysMap[customer.name]?.length ?? 0;
       int deliveredDays = 30 - skippedDays;
       double totalBill = deliveredDays *
           (double.tryParse(customer.milkQuantity ?? '0') ?? 0) *
           (customer.pricePerLiter ?? 0);
 
-      _sendSMS(customer, deliveredDays, skippedDays, totalBill);
-
-      await Future.delayed(Duration(seconds: 4));
-    }
-  }
-
-  void _sendSMS(
-      Customer customer, int deliveredDays, int skippedDays, double totalBill) {
-    String message = """
+      String message = """
 Billing Report:
 Customer: ${customer.name}
-Milk Quantity: ${customer.milkQuantity} Liters
-Price per Liter: Rs. ${customer.pricePerLiter}
-
 Delivered Days: $deliveredDays
 Skipped Days: $skippedDays
-
 Total Bill: Rs. ${totalBill.toStringAsFixed(2)}
-
-Kindly Pay Your Bill on Time. Thank You!
-EasyPaisa Number: 03143130462
+Pay Your Bill. Thank You!
 """;
 
-    String phoneNumber = customer.phoneNo ?? "";
-
-    if (phoneNumber.isNotEmpty) {
-      sendSMS(message: message, recipients: [phoneNumber]);
+      try {
+        await sendSMS(message: message, recipients: [customer.phoneNo ?? ""])
+            .then((result) {
+          print("SMS Sent: $result");
+        }).catchError((error) {
+          print("Failed to send SMS: $error");
+        });
+      } catch (e) {
+        print("Error: $e");
+      }
     } else {
-      print("Customer phone number is missing!");
+      print("SMS Permission Denied!");
     }
   }
 }
