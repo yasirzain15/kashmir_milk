@@ -39,6 +39,19 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0xff78c1f3),
+          title: Text(
+            "Customer Detail",
+            style: GoogleFonts.poppins(
+              textStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w400,
+                color: Color(0xffffffff),
+              ),
+            ),
+          ),
+        ),
         backgroundColor: Color(0xffffffff),
         body: FutureBuilder<Customer?>(
           future: _fetchCustomerData(),

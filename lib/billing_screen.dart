@@ -186,6 +186,7 @@ class _SendToAllSheetState extends State<SendToAllSheet> {
               itemBuilder: (context, index) {
                 final customer = widget.customers[index];
                 return Card(
+                  color: Color(0xffffffff),
                   margin: EdgeInsets.only(bottom: 12),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),

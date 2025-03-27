@@ -65,7 +65,10 @@ class _NotifyScreenState extends State<NotifyScreen> {
   Future<void> sendMessagesToAll() async {
     if (messageController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Please enter a message")),
+        SnackBar(
+          content: Text("Please enter a message"),
+          backgroundColor: Color(0xffff2c2c),
+        ),
       );
       return;
     }
@@ -127,6 +130,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xffffffff),
       appBar: AppBar(
         backgroundColor: Color(0xff78c1f3),
         title: Text(
@@ -148,14 +152,49 @@ class _NotifyScreenState extends State<NotifyScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  TextField(
-                    controller: messageController,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      hintText: 'Type your message here...',
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.grey[100],
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Background color of the TextField
+                      borderRadius:
+                          BorderRadius.circular(10), // Rounded corners
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.3), // Shadow color
+                          spreadRadius: 2, // How much the shadow spreads
+                          blurRadius: 5, // Blur radius for softness
+                          offset: Offset(0, 3), // Position of shadow (x, y)
+                        ),
+                      ],
+                    ),
+                    child: TextField(
+                      controller: messageController,
+                      maxLines: 5,
+                      decoration: InputDecoration(
+                        hintText: 'Type your message here...',
+                        hintStyle: TextStyle(
+                          color: Color(0xffa6a6a6),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                              10), // Match container's radius
+                          borderSide: BorderSide.none, // Hide default border
+                        ),
+                        // enabledBorder: OutlineInputBorder(
+                        //   borderRadius: BorderRadius.circular(10),
+                        //   // borderSide:
+                        //   //     BorderSide(color: Color(0xff78c1f3), width: 1),
+                        // ),
+                        // focusedBorder: OutlineInputBorder(
+                        //   borderRadius: BorderRadius.circular(10),
+                        //   // borderSide:
+                        //   //     BorderSide(color: Color(0xff78c1f3), width: 2),
+                        // ),
+                        filled: true,
+                        fillColor: Colors
+                            .white, // Ensure text field matches container color
+                        contentPadding:
+                            EdgeInsets.all(16), // Padding inside the field
+                      ),
                     ),
                   ),
                   SizedBox(height: 20),
