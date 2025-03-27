@@ -156,38 +156,41 @@ class _BillingDetailsState extends State<BillingDetails> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Select Skipped Days"),
-          content: SizedBox(
-            height: 300,
-            child: TableCalendar(
-              firstDay: DateTime.utc(2024, 1, 1),
-              lastDay: DateTime.utc(2025, 12, 31),
-              focusedDay: DateTime.now(),
-              selectedDayPredicate: (day) => selectedSkippedDays.contains(day),
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  if (selectedSkippedDays.contains(selectedDay)) {
-                    selectedSkippedDays.remove(selectedDay);
-                  } else {
-                    selectedSkippedDays.add(selectedDay);
-                  }
-                });
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  widget.skippedDaysMap[widget.customer.name ?? ""] =
-                      selectedSkippedDays;
-                });
-                Navigator.pop(context);
-              },
-              child: Text("Done"),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Select Skipped Days"),
+              content: SizedBox(
+                height: 300,
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2024, 1, 1),
+                  lastDay: DateTime.utc(2025, 12, 31),
+                  focusedDay: DateTime.now(),
+                  selectedDayPredicate: (day) =>
+                      selectedSkippedDays.contains(day),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      if (selectedSkippedDays.contains(selectedDay)) {
+                        selectedSkippedDays.remove(selectedDay);
+                      } else {
+                        selectedSkippedDays.add(selectedDay);
+                      }
+                    });
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    widget.skippedDaysMap[widget.customer.name ?? ""] =
+                        List.from(selectedSkippedDays);
+                    Navigator.pop(context);
+                  },
+                  child: Text("Done"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
