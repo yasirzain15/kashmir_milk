@@ -1,0 +1,2 @@
+D:/Projects/kashmir_milk/android/app/.cxx/RelWithDebInfo/2y581g5t/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/Projects/kashmir_milk/android/app/.cxx/RelWithDebInfo/2y581g5t/arm64-v8a/CMakeFiles/rebuild_cache.dir

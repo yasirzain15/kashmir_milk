@@ -1,12 +1,11 @@
-// ignore_for_file: avoid_print, deprecated_member_use, use_build_context_synchronously
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive/hive.dart';
 import 'package:kashmeer_milk/Models/customer_model.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_sms/flutter_sms.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotifyScreen extends StatefulWidget {
   @override
@@ -14,15 +13,21 @@ class NotifyScreen extends StatefulWidget {
 }
 
 class _NotifyScreenState extends State<NotifyScreen> {
-  List<Map<String, String>> users = [];
+  List<Customer> users = [];
   bool isLoading = false;
   double progress = 0.0;
-  final double milkPricePerLiter = 220.0;
+  TextEditingController messageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     fetchUsers();
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchUsers() async {
@@ -37,25 +42,18 @@ class _NotifyScreenState extends State<NotifyScreen> {
       List<Map<String, dynamic>> firebaseUsers = querySnapshot.docs
           .map((doc) => {
                 "name": doc['Full Name'],
-                "phone": doc['Phone No'],
-                "milk": doc['Milk Quantity'].toString()
+                "phoneNo": doc['Phone Number'],
               })
           .toList();
 
       var box = Hive.box<Customer>('customers');
-      List<Map> hiveUsers = box.values.map((user) {
-        return {
-          "name": user.name,
-          "phone": user.phoneNo,
-          "milk": user.milkQuantity,
-        };
+      List<Customer> hiveUsers = box.values.map((user) {
+        return Customer();
       }).toList();
 
-      Set<Map<String, String>> uniqueUsers = {
-        ...firebaseUsers
-            .map((user) => user.map((k, v) => MapEntry(k, v.toString()))),
+      Set<Customer> uniqueUsers = {
+        ...firebaseUsers.map((user) => Customer.fromJson(user)),
         ...hiveUsers
-            .map((user) => user.map((k, v) => MapEntry(k, v.toString())))
       };
 
       setState(() {
@@ -68,40 +66,47 @@ class _NotifyScreenState extends State<NotifyScreen> {
     setState(() => isLoading = false);
   }
 
-  Future<void> sendBillsToAll() async {
-    setState(() => progress = 0.0);
-
-    for (int i = 0; i < users.length; i++) {
-      double milkQuantity = double.tryParse(users[i]["milk"]!) ?? 0.0;
-      double totalBill = milkQuantity * milkPricePerLiter;
-      String message =
-          "Hello ${users[i]["name"]}, your total bill for ${users[i]["milk"]} liters of milk is PKR ${totalBill.toStringAsFixed(2)}.Please make the payment soon. Thank you!  EasyPaisa Number : 03143130462";
-
-      await sendSms(users[i]["phone"]!, message);
-
-      setState(() {
-        progress = (i + 1) / users.length;
-      });
-      await Future.delayed(Duration(milliseconds: 500));
+  Future<void> sendMessagesToAll() async {
+    if (messageController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please enter a message")),
+      );
+      return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Bills sent to all customers!"),
-        duration: Duration(seconds: 1),
-        backgroundColor: Color(0xff78c1f3),
-      ),
-    );
-    setState(() {
-      progress = 0.0;
-    });
+    setState(() => progress = 0.0);
+
+    if (await Permission.sms.request().isGranted) {
+      for (int i = 0; i < users.length; i++) {
+        await sendSms(users[i].phoneNo ?? '', messageController.text);
+
+        setState(() {
+          progress = (i + 1) / users.length;
+        });
+        await Future.delayed(Duration(milliseconds: 500));
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Messages sent to all customers!"),
+          duration: Duration(seconds: 2),
+          backgroundColor: Color(0xff78c1f3),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("SMS permission denied"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+
+    setState(() => progress = 0.0);
   }
 
   Future<void> sendSms(String phone, String message) async {
-    if (phone.isEmpty || message.isEmpty) {
-      print("Phone number or message is empty");
-      return;
-    }
+    if (phone.isEmpty || message.isEmpty) return;
 
     // Normalize phone number
     String normalizedPhone = phone.replaceAll(RegExp(r'[^0-9+]'), '');
@@ -111,33 +116,15 @@ class _NotifyScreenState extends State<NotifyScreen> {
       normalizedPhone = "+92${normalizedPhone.substring(1)}";
     }
 
-    // Validate phone number format
-    if (!RegExp(r'^\+?[0-9]{10,15}$').hasMatch(normalizedPhone)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Invalid phone number format: $phone")),
-      );
-      return;
-    }
-
-    final Uri smsUri =
-        Uri.parse("sms:$normalizedPhone?body=${Uri.encodeComponent(message)}");
-
     try {
-      bool launched = await launch(smsUri.toString());
-
-      if (!launched) {
-        throw 'Could not launch SMS';
-      }
-    } catch (e) {
-      print("Error launching SMS: $e");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              "Unable to send SMS. Please check your default messaging app."),
-          backgroundColor: Colors.red,
-        ),
+      await sendSMS(
+        message: message,
+        recipients: [normalizedPhone],
+        sendDirect: true,
       );
+    } catch (e) {
+      print("Error sending SMS: $e");
+      throw e;
     }
   }
 
@@ -162,39 +149,34 @@ class _NotifyScreenState extends State<NotifyScreen> {
         child: Column(
           children: [
             Expanded(
-              child: isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(
-                      color: Color(0xff78c1f3),
-                    ))
-                  : ListView.builder(
-                      itemCount: users.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: ListTile(
-                            title: Text(
-                              users[index]["name"]!,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            subtitle: Text("Milk: ${users[index]["milk"]} L"),
-                            trailing: Text(
-                              users[index]["phone"]!,
-                              style: TextStyle(
-                                color: Color(0xff78c1f3),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextField(
+                    controller: messageController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      hintText: 'Type your message here...',
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[100],
                     ),
+                  ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Example: "We are not available today. Milk delivery will resume Soon."',
+                    style: TextStyle(color: Colors.grey),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
             LinearProgressIndicator(value: progress),
             SizedBox(height: 10),
             GestureDetector(
-              onTap: sendBillsToAll,
+              onTap: () {
+                sendMessagesToAll();
+              },
               child: Container(
                 height: 44.53,
                 width: 175,
@@ -207,13 +189,15 @@ class _NotifyScreenState extends State<NotifyScreen> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Send Bills to All',
+                        'Send Message',
                         style: GoogleFonts.poppins(
                           textStyle: TextStyle(
                             fontWeight: FontWeight.w400,
@@ -222,9 +206,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        width: 11,
-                      ),
+                      SizedBox(width: 11),
                       Icon(
                         Icons.send,
                         color: Color(0xffffffff),

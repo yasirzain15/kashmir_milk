@@ -6,8 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:kashmeer_milk/functions.dart';
-import 'package:kashmeer_milk/send_mesage.dart';
 import 'package:kashmeer_milk/customerdetail_screen.dart';
+import 'package:flutter_sms/flutter_sms.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class SeeallScreen extends StatefulWidget {
   const SeeallScreen({super.key});
@@ -18,7 +20,8 @@ class SeeallScreen extends StatefulWidget {
 
 class _SeeallScreenState extends State<SeeallScreen> {
   List<Customer> customers = [];
-  String _searchQuery = ""; // Variable to store the search query
+  String _searchQuery = "";
+  Map<String, List<DateTime>> skippedDaysMap = {};
 
   @override
   void initState() {
@@ -26,7 +29,6 @@ class _SeeallScreenState extends State<SeeallScreen> {
     _fetchCustomers();
   }
 
-  // Fetch all customers from Firestore and Hive
   Future<void> _fetchCustomers() async {
     List<Customer> hiveCustomers = _getCustomersFromHive();
     List<Customer> firestoreCustomers = await _getCustomersFromFirestore();
@@ -36,13 +38,11 @@ class _SeeallScreenState extends State<SeeallScreen> {
     });
   }
 
-  // Fetch customers stored in Hive
   List<Customer> _getCustomersFromHive() {
     final box = Hive.box<Customer>('customers');
     return box.values.toList();
   }
 
-  // Fetch customers from Firestore
   Future<List<Customer>> _getCustomersFromFirestore() async {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -63,10 +63,9 @@ class _SeeallScreenState extends State<SeeallScreen> {
     }
   }
 
-  // Function to filter customers based on the search query
   List<Customer> _filterCustomers(List<Customer> customers, String query) {
     if (query.isEmpty) {
-      return customers; // Return all customers if the query is empty
+      return customers;
     }
     return customers.where((customer) {
       final name = customer.name?.toString().toLowerCase() ?? "";
@@ -78,6 +77,140 @@ class _SeeallScreenState extends State<SeeallScreen> {
     }).toList();
   }
 
+  Future<void> _showSkippedDaysDialog(Customer customer) async {
+    List<DateTime> selectedDays =
+        List.from(skippedDaysMap[customer.name] ?? []);
+    DateTime focusedDay = DateTime.now();
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Select Skipped Days for ${customer.name}"),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 400,
+                child: TableCalendar(
+                  firstDay: DateTime.utc(2020, 1, 1),
+                  lastDay: DateTime.utc(2030, 12, 31),
+                  focusedDay: focusedDay,
+                  selectedDayPredicate: (day) {
+                    return selectedDays.any((selectedDay) =>
+                        selectedDay.year == day.year &&
+                        selectedDay.month == day.month &&
+                        selectedDay.day == day.day);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      if (selectedDays.any((day) =>
+                          day.year == selectedDay.year &&
+                          day.month == selectedDay.month &&
+                          day.day == selectedDay.day)) {
+                        selectedDays.removeWhere((day) =>
+                            day.year == selectedDay.year &&
+                            day.month == selectedDay.month &&
+                            day.day == selectedDay.day);
+                      } else {
+                        selectedDays.add(selectedDay);
+                      }
+                    });
+                  },
+                  calendarFormat: CalendarFormat.month,
+                  headerStyle: const HeaderStyle(
+                    formatButtonVisible: false,
+                    titleCentered: true,
+                  ),
+                  calendarStyle: const CalendarStyle(
+                    todayDecoration: BoxDecoration(
+                      color: Colors.blueAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    selectedDecoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      skippedDaysMap[customer.name ?? ""] = selectedDays;
+                    });
+                    _sendMonthlyReport(customer, selectedDays);
+                    Navigator.pop(context);
+                  },
+                  child: const Text("Send Report"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _sendMonthlyReport(
+      Customer customer, List<DateTime> skippedDays) async {
+    if (await Permission.sms.request().isGranted) {
+      try {
+        int deliveredDays = 30 - skippedDays.length;
+        double totalBill = deliveredDays *
+            (double.tryParse(customer.milkQuantity ?? '0') ?? 0) *
+            (customer.pricePerLiter ?? 0);
+
+        String message = """
+Monthly Milk Report for ${customer.name}:
+------------------------------
+Milk Quantity: ${customer.milkQuantity} liters
+Price per Liter: Rs. ${customer.pricePerLiter}
+Delivered Days: $deliveredDays
+Skipped Days: ${skippedDays.length}
+Total Bill: Rs. ${totalBill.toStringAsFixed(2)}
+------------------------------
+Please make the payment at your earliest convenience.
+Thank you for your business!
+""";
+
+        await sendSMS(
+          message: message,
+          recipients: [customer.phoneNo ?? ""],
+          sendDirect: true,
+        );
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Report sent to ${customer.name}"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Failed to send report: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("SMS permission denied"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredCustomers = _filterCustomers(customers, _searchQuery);
@@ -85,11 +218,11 @@ class _SeeallScreenState extends State<SeeallScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xff78c1f3),
+          backgroundColor: const Color(0xff78c1f3),
           title: Text(
             "Customers Reports",
             style: GoogleFonts.poppins(
-              textStyle: TextStyle(
+              textStyle: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.white,
@@ -113,8 +246,8 @@ class _SeeallScreenState extends State<SeeallScreen> {
                       color: Color(0xffa6a6a6),
                     ),
                   ),
-                  filled: true, // Enable background fill
-                  fillColor: Color(0x2bc5e0f2), // Set background color
+                  filled: true,
+                  fillColor: const Color(0x2bc5e0f2),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -129,8 +262,9 @@ class _SeeallScreenState extends State<SeeallScreen> {
                 child: filteredCustomers.isEmpty
                     ? const Center(
                         child: CircularProgressIndicator(
-                        color: Color(0xff78c1f3),
-                      ))
+                          color: Color(0xff78c1f3),
+                        ),
+                      )
                     : ListView.builder(
                         itemCount: filteredCustomers.length,
                         itemBuilder: (context, index) {
@@ -145,7 +279,6 @@ class _SeeallScreenState extends State<SeeallScreen> {
     );
   }
 
-  // Build UI for each customer item
   Widget buildCustomerItem(Customer customer) {
     String name = customer.name ?? "Unknown";
     String city = customer.city ?? "Unknown City";
@@ -166,7 +299,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
         );
       },
       child: Card(
-        color: const Color(0xffffffff),
+        color: Colors.white,
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         elevation: 3,
         child: Padding(
@@ -230,14 +363,12 @@ class _SeeallScreenState extends State<SeeallScreen> {
                     const SizedBox(height: 15),
                     Center(
                       child: GestureDetector(
-                        onTap: () {
-                          SendMessage().sendMessage(customer, context);
-                        },
+                        onTap: () => _showSkippedDaysDialog(customer),
                         child: Container(
                           width: 300,
                           height: 36.53,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
                               colors: [
                                 Color(0xff78c1f3),
                                 Color(0xff78a2f3),
@@ -253,7 +384,7 @@ class _SeeallScreenState extends State<SeeallScreen> {
                                 textStyle: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xffffffff),
+                                  color: Colors.white,
                                 ),
                               ),
                             ),
