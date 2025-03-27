@@ -39,12 +39,8 @@ class _NotifyScreenState extends State<NotifyScreen> {
           .doc(FirebaseAuth.instance.currentUser?.uid)
           .collection('customer');
       var querySnapshot = await snapshot.get();
-      List<Map<String, dynamic>> firebaseUsers = querySnapshot.docs
-          .map((doc) => {
-                "name": doc['Full Name'],
-                "phoneNo": doc['Phone Number'],
-              })
-          .toList();
+      List<Map<String, dynamic>> firebaseUsers =
+          querySnapshot.docs.map((doc) => doc.data()).toList();
 
       var box = Hive.box<Customer>('customers');
       List<Customer> hiveUsers = box.values.map((user) {
