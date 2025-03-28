@@ -466,7 +466,7 @@ class _BillingDetailsState extends State<BillingDetails> {
           Text("Milk Quantity: ${widget.customer.milkQuantity} Liters"),
           Text("Price per Liter: Rs. ${widget.customer.pricePerLiter}"),
           SizedBox(height: 10),
-          Text("Skipped Days: $skippedDays"),
+          Text("Skipped Days: ${selectedSkippedDays.length}"),
           Text("Delivered Days: $deliveredDays"),
           ElevatedButton(
             onPressed: () => _selectSkippedDays(context),

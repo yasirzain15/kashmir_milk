@@ -500,6 +500,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     child: Consumer<Funs>(
                       builder: (context, provider, child) => TextFormField(
                         controller: _customerController,
+                        cursorColor: Color(0xff78c1f3),
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintText: 'Search Customers',

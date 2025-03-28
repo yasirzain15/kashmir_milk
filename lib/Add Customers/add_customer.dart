@@ -505,6 +505,7 @@ class _CustomerRegistrationFormState extends State<CustomerRegistrationForm> {
         ],
       ),
       child: TextFormField(
+        cursorColor: Color(0xff78c1f3),
         controller: controller,
         keyboardType: isNumber ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(

@@ -132,6 +132,9 @@ class _NotifyScreenState extends State<NotifyScreen> {
     return Scaffold(
       backgroundColor: Color(0xffffffff),
       appBar: AppBar(
+        iconTheme: IconThemeData(
+          color: Color(0xffffffff),
+        ),
         backgroundColor: Color(0xff78c1f3),
         title: Text(
           "Notify Customers",
@@ -167,6 +170,7 @@ class _NotifyScreenState extends State<NotifyScreen> {
                       ],
                     ),
                     child: TextField(
+                      cursorColor: Color(0xff78c1f3),
                       controller: messageController,
                       maxLines: 5,
                       decoration: InputDecoration(

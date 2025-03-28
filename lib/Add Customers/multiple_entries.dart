@@ -178,6 +178,7 @@ class _CsvExcelUploaderState extends State<CsvExcelUploader> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Color(0xffffffff),
         appBar: AppBar(
           automaticallyImplyLeading: true,
           backgroundColor: Color(0xff78c1f3),
