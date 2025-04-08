@@ -1,3 +1,4 @@
+// All repositories used for dependencies
 allprojects {
     repositories {
         google()
@@ -6,25 +7,30 @@ allprojects {
     }
 }
 
+// Define the build directory
 rootProject.buildDir = "../build"
 
 buildscript {
-    ext.kotlin_version = '1.9.22' // Latest Kotlin version
+    ext.kotlin_version = '1.9.22' // Latest Kotlin version for Java 17 compatibility
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.0' // Updated Gradle plugin version
+        // Updated Android Gradle plugin version (7.4.1) supports Java 17
+        classpath 'com.android.tools.build:gradle:7.4.1' // Use AGP 7.4.1 for Java 17 compatibility
+        // Kotlin Gradle plugin version (latest stable for Java 17)
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 subprojects {
+    // Configure the build directory for all subprojects
     project.buildDir = "${rootProject.buildDir}/${project.name}"
     project.evaluationDependsOn(":app")
 }
 
+// Clean task to delete the build directory
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }

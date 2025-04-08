@@ -399,7 +399,7 @@ Please Pay Your Bill. Thank You!
           context: context,
           builder: (context) => AlertDialog(
             title:
-                Text("Succesfully sent to ${failedCustomers.length} customers"),
+                Text("Failed to send to ${failedCustomers.length} customers"),
             content: SingleChildScrollView(
                 // child: Column(
                 //   children: failedCustomers.map((name) => Text(name)).toList(),
