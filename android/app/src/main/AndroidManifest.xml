@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kashmeer_milk">
 
-    <!-- ✅ Required Permissions -->
+    <!-- Required Permissions for SMS -->
     <uses-permission android:name="android.permission.SEND_SMS"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
-    <!-- ✅ Required for Android 10+ (Query SMS App) -->
+    <!-- For Android 10+ (Query SMS and Contacts App) -->
     <queries>
         <package android:name="com.android.mms"/>
         <package android:name="com.android.contacts"/>
@@ -20,10 +20,10 @@
         android:label="kashmeer_milk"
         android:icon="@mipmap/ic_launcher">
 
-        <!-- ✅ Disable Impeller to fix black screen issue -->
+        <!-- Disable Impeller to fix black screen issue -->
         <meta-data android:name="flutter.renderer" android:value="skia"/>
         
-        <!-- ✅ Required Flutter metadata -->
+        <!-- Required Flutter Metadata -->
         <meta-data android:name="flutterEmbedding" android:value="2"/>
 
         <activity

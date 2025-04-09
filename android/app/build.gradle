@@ -22,7 +22,6 @@ plugins {
 android {
     namespace "com.example.kashmeer_milk"
     compileSdk 34
-
     ndkVersion = flutter.ndkVersion ?: "25.1.8937393"
 
     signingConfigs {
