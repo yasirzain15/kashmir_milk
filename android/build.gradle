@@ -5,21 +5,27 @@ allprojects {
         mavenCentral()
         jcenter() // Legacy support (optional)
     }
+
+    // 🔧 Fix JVM target mismatch by forcing Kotlin to use jvmTarget 1.8
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
 }
 
 // Define the build directory
 rootProject.buildDir = "../build"
 
 buildscript {
-    ext.kotlin_version = '1.9.22' // Latest Kotlin version for Java 17 compatibility
+    ext.kotlin_version = '1.5.20' // Latest Kotlin version for Java 17 compatibility
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        // Updated Android Gradle plugin version (7.4.1) supports Java 17
-        classpath 'com.android.tools.build:gradle:7.4.1' // Use AGP 7.4.1 for Java 17 compatibility
-        // Kotlin Gradle plugin version (latest stable for Java 17)
+        // Updated Android Gradle plugin version (7.4.2) supports Java 17
+        classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
