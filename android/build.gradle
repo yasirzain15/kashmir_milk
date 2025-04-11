@@ -18,7 +18,7 @@ allprojects {
 rootProject.buildDir = "../build"
 
 buildscript {
-    ext.kotlin_version = '1.5.20' // Latest Kotlin version for Java 17 compatibility
+    ext.kotlin_version = '1.9.22' // Latest Kotlin version for Java 17 compatibility
     repositories {
         google()
         mavenCentral()
