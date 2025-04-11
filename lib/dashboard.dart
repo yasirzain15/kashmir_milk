@@ -242,25 +242,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ),
                         PopupMenuItem(
-                          value: 1,
-                          child: ListTile(
-                            title: Text(
-                              'Quick Alerts',
-                              style: GoogleFonts.poppins(
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                  color: Color(0xff12121f),
+                          value: 2,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SeeallScreen(),
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              title: Text(
+                                'See All Customers',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xff12121f),
+                                  ),
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Complete Customer Details',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    color: Color(0xffafafbd),
+                                  ),
                                 ),
                               ),
                             ),
-                            subtitle: Text(
-                              'Send Quick Alerts for',
-                              style: GoogleFonts.poppins(
-                                textStyle: const TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 10,
-                                  color: Color(0xffafafbd),
+                          ),
+                        ),
+                        PopupMenuItem(
+                          value: 1,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotifyScreen(),
+                                ),
+                              );
+                            },
+                            child: ListTile(
+                              title: Text(
+                                'Quick Alerts',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: Color(0xff12121f),
+                                  ),
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Send Quick Alerts for',
+                                style: GoogleFonts.poppins(
+                                  textStyle: const TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 10,
+                                    color: Color(0xffafafbd),
+                                  ),
                                 ),
                               ),
                             ),
@@ -344,50 +389,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Color(0xff78c1f3),
                         ),
                       ),
-                    ),
-                    PopupMenuButton(
-                      color: Color(0xffffffff),
-                      itemBuilder: (context) => [
-                        PopupMenuItem(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const SeeallScreen(),
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              title: Text('Send Reports'),
-                              leading: SvgPicture.asset(
-                                'assets/speed.svg',
-                                height: 24,
-                                width: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                        PopupMenuItem(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => NotifyScreen(),
-                                ),
-                              );
-                            },
-                            child: ListTile(
-                              title: Text('Send Message to All'),
-                              leading: Icon(
-                                Icons.message_outlined,
-                                color: Color(0xff78c1f3),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),
